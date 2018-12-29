@@ -11,11 +11,21 @@
  * @returns {function(string|Symbol): function(string, number): Token}
  */
 export const Token = text => type => (lexeme, offset) => ({ type, lexeme, offset, text });
+/**
+ * @param {string|Symbol} type
+ * @returns {function(string): function(string, number): Token}
+ */
 export const makeToken = type => text => (lexeme, offset) => ({ type, lexeme, offset, text });
+/**
+ * @param {string} text
+ * @returns {function(string, number): null}
+ */
+export const makeNothing = text => (lexeme, offset) => null;
 
 /**
  * @typedef TokState
- * @property {function(): string} advance - Advance the tokenizer 1, returns character
+ * @property {function(): string} advance - Advance the tokenizer 1 character forward
+ * @property {function(): string} retreat - Moves the tokenizer 1 character back
  * @property {function(): string} look - Returns current character
  * @property {function(): string} peek - Returns next character
  * @property {function(): boolean} atEnd - Returns if the text is at end
@@ -51,6 +61,7 @@ export const Tokenizer = function () {
         let current = 0;
         
         const advance = () => { return text[current++]; }
+        const retreat = () => { return text[current--]; }
         const look = () => text[current - 1];
         const peek = () => text[current];
         const atEnd = () => current >= text.length;
@@ -58,7 +69,7 @@ export const Tokenizer = function () {
 
         /** @type TokState */
         const tokState = {
-            advance, look, peek, atEnd, getCurrent, text,
+            advance, retreat, look, peek, atEnd, getCurrent, text,
         };
 
         while (!atEnd()) {
@@ -66,7 +77,8 @@ export const Tokenizer = function () {
             reducers.reduce((finished, reducer) => {
                 if (finished) return;
                 const state = reducer(char, tokState);
-                output.push(...state.tokens);
+                const newToks = state.tokens.filter(token => token !== null);
+                output.push(...newToks);
                 return state.finished;
             }, false);
         }
@@ -121,7 +133,7 @@ export const Tokenizer = function () {
 
 /**
  * @callback TokenCreator
- * @param {string} type
+ * @param {string} text
  * @returns {function(string, number): Token}
  */
 
@@ -143,7 +155,7 @@ export const everything = tokenCreator => (char, state) => {
     const text = state.text.substring(start, end);
 
     return {
-        continue: false,
+        finished: true,
         tokens: [tokenCreator(state.text)(text, start)],
     };
 }
@@ -164,7 +176,7 @@ export const everythingUntil = (...chars) => tokenCreator => (char, state) => {
     const text = state.text.substring(start, end);
 
     return {
-        continue: false,
+        finished: true,
         tokens: [tokenCreator(state.text)(text, start)],
     };
 }
@@ -176,11 +188,106 @@ export const everythingUntil = (...chars) => tokenCreator => (char, state) => {
  */
 export const single = tokenCreator => (char, state) => {
     return {
-        continue: false,
+        finished: true,
         tokens: [tokenCreator(state.text)(char, state.getCurrent() - 1)],
     };
 }
 
+/**
+ * 
+ * @param {...Consumer} consumers
+ * @returns {function(TokenCreator): Reducer}
+ */
+export const sequence = (...consumers) => tokenCreator => (char, state) => {
+    state.retreat();
+    const start = state.getCurrent();
+    consumers.forEach(consumer => consumer(state));
+    const end = state.getCurrent();
+    if (start === end) state.advance();
+
+    const lexeme = state.text.substring(start, end);
+
+    return {
+        finished: start === end,
+        tokens: start === end ? [] : [ tokenCreator(state.text)(lexeme, start) ],
+    };
+}
+
+/**
+ * Runs a consumer and creates a token from what it consumes
+ * @param {Consumer} consumer
+ */
+export const consume = consumer => tokenCreator => (char, state) => {
+    state.retreat();
+    const start = state.getCurrent();
+    consumer(state);
+    const end = state.getCurrent();
+    if (start === end) state.advance();
+
+    const lexeme = state.text.substring(start, end);
+
+    return {
+        finished: start !== end,
+        tokens: start === end ? [] : [ tokenCreator(state.text)(lexeme, start) ],
+    }
+}
+
+
+
+/**************************
+    BUILT-IN CONSUMERS
+ ***************************/
+
+/**
+ * Consumes a single specified character
+ * @param {string} char - Character to match
+ * @returns {Consumer}
+ */
+export const char = char => state => {
+    if (state.peek() === char) state.advance();
+}
+
+/**
+ * Consumes a single character that matches the supplied regex
+ * @param {RegExp} regex
+ * @returns {Consumer}
+ */
+export const regex = regex => state => {
+    if (regex.test(state.peek())) state.advance();
+}
+
+/**
+ * Runs the regex on increasing chunks of text until the regex fails
+ * @param {RegExp} regex - Regex to test piece with
+ * @returns {Consumer}
+ */
+export const untilRegexFails = regex => state => {
+    const start = state.getCurrent();
+    const nextPiece = () => state.text.substring(start, state.getCurrent() + 1);
+    while (regex.test(nextPiece())) state.advance();
+}
+
+/**
+ * Consumes characters until non-whitespace character is found
+ * @returns {Consumer}
+ */
+export const whitespace = () => state => {
+    const chars = [' ', '\f', '\n', '\r', '\t', '\v'];
+    if (chars.includes(state.look())) return;
+    while (chars.includes(state.peek())) state.advance();
+}
+
+/**
+ * Consumes and checks for a string
+ * @param {String} string
+ * @returns {Consumer}
+ */
+export const str = string => state => {
+    const start = state.getCurrent();
+    for (let i = 0; i < string.length; i++) state.advance();
+    const found = state.text.substring(start, state.getCurrent());
+    if (found !== string) throw new Error(`Mismatched string: expected '${string}' but got '${found}'`);
+}
 
 
 /**************************
@@ -198,7 +305,7 @@ export const stringifyToken =
  * @param {Token[]} tokens 
  */
 export const prettyPrint = tokens =>
-   '[\n  ' + tokens
-       .map(stringifyToken)
-       .join(',\n  ')
-   + '\n]'
+    '[\n  ' + tokens
+        .map(stringifyToken)
+        .join(',\n  ')
+    + '\n]'

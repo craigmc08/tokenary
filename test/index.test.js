@@ -1,10 +1,21 @@
 const {
     Tokenizer,
+
     Token,
     makeToken,
+    makeNothing,
+
     everything,
     everythingUntil,
     single,
+    sequence,
+    consume,
+
+    char,
+    regex,
+    untilRegexFails,
+    whitespace,
+    str,
 
     prettyPrint,
 } = require('../dist');
@@ -59,6 +70,42 @@ test('everythingUntil should add characters until it reaches an invalid characte
     ];
 
     expect(csv(text)).toEqual(expected);
+});
+
+test('sequence should consume sequences of consumers', () => {
+    const stringTokenizer = Tokenizer()
+        .onChar({
+            '"': sequence(
+                char('"'),
+                untilRegexFails(/^(\\"|[^\n"])*$/),
+                char('"'),
+            )(makeToken('STRING')),
+        })
+    ;
+
+    const text = '"this is a string" these won\'t show up. "another string"';
+
+    const expected = [
+        Token(text)('STRING')('"this is a string"', 0),
+        Token(text)('STRING')('"another string"', 40),
+    ];
+
+    expect(stringTokenizer(text)).toEqual(expected);
+});
+
+test('consume should consume characters from one consumer and create a token', () => {
+    const consumeTest = Tokenizer()
+        .default(consume(whitespace())(makeToken('WHITESPACE')))
+    ;
+
+    const text = '    \nepic\t   ';
+
+    const expected = [
+        Token(text)('WHITESPACE')('    \n', 0),
+        Token(text)('WHITESPACE')('\t   ', 9),
+    ];
+
+    expect(consumeTest(text)).toEqual(expected);
 });
 
 test('prettyPrint should format the tokens nicely for viewing', () => {
