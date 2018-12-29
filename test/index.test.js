@@ -18,7 +18,7 @@ const {
     str,
 
     prettyPrint,
-} = require('../dist');
+} = require('../src');
 
 test('default everything should catch everything', () => {
     const gobble = Tokenizer().default(everything(makeToken('EVERYTHING')));

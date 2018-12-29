@@ -1,7 +1,7 @@
 const {
     is, isOneOf, matches,
     not, or, nor, and, nand, xor
-} = require('../dist/predicate');
+} = require('../src/predicate');
 
 test('is should return true for values that are the same', () => {
     expect(is('a')('a')).toBe(true);

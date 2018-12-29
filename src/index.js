@@ -10,17 +10,22 @@
  * @param {string} text - Full text token belongs to
  * @returns {function(string|Symbol): function(string, number): Token}
  */
-export const Token = text => type => (lexeme, offset) => ({ type, lexeme, offset, text });
+const Token = text => type => (lexeme, offset) => ({ type, lexeme, offset, text });
+exports.Token = Token;
+
 /**
  * @param {string|Symbol} type
  * @returns {function(string): function(string, number): Token}
  */
-export const makeToken = type => text => (lexeme, offset) => ({ type, lexeme, offset, text });
+const makeToken = type => text => (lexeme, offset) => ({ type, lexeme, offset, text });
+exports.makeToken = makeToken;
+
 /**
  * @param {string} text
  * @returns {function(string, number): null}
  */
-export const makeNothing = text => (lexeme, offset) => null;
+const makeNothing = text => (lexeme, offset) => null;
+exports.makeNothing = makeNothing;
 
 /**
  * @typedef TokState
@@ -47,7 +52,7 @@ export const makeNothing = text => (lexeme, offset) => null;
  * @returns {ReducerState} Information about the reducer after it is finished
  */
 
-export const Tokenizer = function () {
+const Tokenizer = function () {
     /** @type {Reducer[]} */
     const reducers = [];
 
@@ -130,6 +135,7 @@ export const Tokenizer = function () {
 
     return T;
 }
+exports.Tokenizer = Tokenizer;
 
 /**
  * @callback TokenCreator
@@ -147,7 +153,7 @@ export const Tokenizer = function () {
  * @param {TokenCreator} tokenCreator
  * @returns {Reducer}
  */
-export const everything = tokenCreator => (char, state) => {
+const everything = tokenCreator => (char, state) => {
     const start = state.getCurrent() - 1;
     while (!state.atEnd()) state.advance();
     const end = state.getCurrent();
@@ -159,13 +165,14 @@ export const everything = tokenCreator => (char, state) => {
         tokens: [tokenCreator(state.text)(text, start)],
     };
 }
+exports.everything = everything;
 
 /**
  * 
  * @param {...string} chars - Characters to possibly match
  * @returns {function(TokenCreator): Reducer}
  */
-export const everythingUntil = (...chars) => tokenCreator => (char, state) => {
+const everythingUntil = (...chars) => tokenCreator => (char, state) => {
     const start = state.getCurrent() - 1;
     if (chars.includes(char)) return { continue: true, tokens: [] };
     while (!chars.includes(state.peek()) && !state.atEnd()) {
@@ -180,25 +187,27 @@ export const everythingUntil = (...chars) => tokenCreator => (char, state) => {
         tokens: [tokenCreator(state.text)(text, start)],
     };
 }
+exports.everythingUntil = everythingUntil;
 
 /**
  * Creates a token from the single current character
  * @param {TokenCreator} tokenCreator
  * @returns {Reducer}
  */
-export const single = tokenCreator => (char, state) => {
+const single = tokenCreator => (char, state) => {
     return {
         finished: true,
         tokens: [tokenCreator(state.text)(char, state.getCurrent() - 1)],
     };
 }
+exports.single = single;
 
 /**
  * 
  * @param {...Consumer} consumers
  * @returns {function(TokenCreator): Reducer}
  */
-export const sequence = (...consumers) => tokenCreator => (char, state) => {
+const sequence = (...consumers) => tokenCreator => (char, state) => {
     state.retreat();
     const start = state.getCurrent();
     consumers.forEach(consumer => consumer(state));
@@ -212,12 +221,13 @@ export const sequence = (...consumers) => tokenCreator => (char, state) => {
         tokens: start === end ? [] : [ tokenCreator(state.text)(lexeme, start) ],
     };
 }
+exports.sequence = sequence;
 
 /**
  * Runs a consumer and creates a token from what it consumes
  * @param {Consumer} consumer
  */
-export const consume = consumer => tokenCreator => (char, state) => {
+const consume = consumer => tokenCreator => (char, state) => {
     state.retreat();
     const start = state.getCurrent();
     consumer(state);
@@ -231,6 +241,7 @@ export const consume = consumer => tokenCreator => (char, state) => {
         tokens: start === end ? [] : [ tokenCreator(state.text)(lexeme, start) ],
     }
 }
+exports.consume = consume;
 
 
 
@@ -243,51 +254,56 @@ export const consume = consumer => tokenCreator => (char, state) => {
  * @param {string} char - Character to match
  * @returns {Consumer}
  */
-export const char = char => state => {
+const char = char => state => {
     if (state.peek() === char) state.advance();
 }
+exports.char = char;
 
 /**
  * Consumes a single character that matches the supplied regex
  * @param {RegExp} regex
  * @returns {Consumer}
  */
-export const regex = regex => state => {
+const regex = regex => state => {
     if (regex.test(state.peek())) state.advance();
 }
+exports.regex = regex;
 
 /**
  * Runs the regex on increasing chunks of text until the regex fails
  * @param {RegExp} regex - Regex to test piece with
  * @returns {Consumer}
  */
-export const untilRegexFails = regex => state => {
+const untilRegexFails = regex => state => {
     const start = state.getCurrent();
     const nextPiece = () => state.text.substring(start, state.getCurrent() + 1);
     while (regex.test(nextPiece())) state.advance();
 }
+exports.untilRegexFails = untilRegexFails;
 
 /**
  * Consumes characters until non-whitespace character is found
  * @returns {Consumer}
  */
-export const whitespace = () => state => {
+const whitespace = () => state => {
     const chars = [' ', '\f', '\n', '\r', '\t', '\v'];
     if (chars.includes(state.look())) return;
     while (chars.includes(state.peek())) state.advance();
 }
+exports.whitespace = whitespace;
 
 /**
  * Consumes and checks for a string
  * @param {String} string
  * @returns {Consumer}
  */
-export const str = string => state => {
+const str = string => state => {
     const start = state.getCurrent();
     for (let i = 0; i < string.length; i++) state.advance();
     const found = state.text.substring(start, state.getCurrent());
     if (found !== string) throw new Error(`Mismatched string: expected '${string}' but got '${found}'`);
 }
+exports.str = str;
 
 
 /**************************
@@ -297,23 +313,25 @@ export const str = string => state => {
 /**
  * @param {Token} token
  */
-export const stringifyToken =
+const stringifyToken =
     token => `<Token type='${token.type}' lexeme='${token.lexeme}' offset=${token.offset}>`
+exports.stringifyToken = stringifyToken;
 
 /**
  * Formats an array of tokens
  * @param {Token[]} tokens 
  */
-export const prettyPrint = tokens =>
+const prettyPrint = tokens =>
     '[\n  ' + tokens
         .map(stringifyToken)
         .join(',\n  ')
     + '\n]'
+exports.prettyPrint = prettyPrint;
 
 
     
 /**************************
     PREDICATES
  ***************************/
-import predicatesImport from './predicates';
-export const predicates = predicatesImport;
+const predicate = require('./predicate');
+exports.predicate = predicate;
