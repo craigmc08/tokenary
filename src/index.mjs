@@ -309,3 +309,11 @@ export const prettyPrint = tokens =>
         .map(stringifyToken)
         .join(',\n  ')
     + '\n]'
+
+
+    
+/**************************
+    PREDICATES
+ ***************************/
+import predicatesImport from './predicates';
+export const predicates = predicatesImport;
