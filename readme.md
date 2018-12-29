@@ -45,6 +45,8 @@ console.log(prettyPrint(tokens));
 */
 ```
 
+See [examples](examples)
+
 ## API
 The whole idea of tokenary is based off the idea of "reducers", which is probably not an accurate name but it's what they are called. These functions take in the state of the tokenizer and spit out some tokens. The `Tokenizer` object manages and triggers these reducers. More complex behavior is achieved by composing reducers together. See the [reducers](#Reducers) section for what is available.
 
@@ -86,6 +88,35 @@ Curried function. First call will use the arguments as characters to stop gobbli
 
 #### single
 Grabs a single character. Call with a `TokenCreator`.
+
+#### sequence
+Runs all consumers passed to it in order. Runs the specified `TokenCreator` with the characters consumed.
+
+Example:
+```js
+sequence(char('"'), untilRegexFails(/^[^"]$*/), char('"'))(makeToken('string'))
+// Simple reducer for parsing strings like "hello world", does not support escaped quotes
+```
+
+#### consume
+Runs the single consumer passed to it, then runs the specified `TokenCreator` with the characters consumed. Very similar to [sequence](#sequence)
+
+### Consumers
+Consumers are used to "eat" characters from the text. Pass these to specific reducers.
+#### char
+Consumes a single specified character.
+
+#### regex
+Consumes a single character that matches the specified regular expression.
+
+#### untilRegexFails
+Continues to consume characters until the whole consumed string fails to match.
+
+#### whitespace
+Consumes all whitespace characters (` `, `\n`, `\f`, `\r`, `\t`, `\v`) until it finds non-whitespace.
+
+#### str
+Consumes the specified string. Throws an error if it fails to match the string.
 
 ### Miscellaneous
 #### Token
