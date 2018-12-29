@@ -1,19 +1,12 @@
 const {
     Tokenizer,
-
-    Token,
-    makeToken,
-
-    single,
-    sequence,
-    consume,
-
-    char,
-    untilRegexFails,
-    str,
-
+    Token, makeToken,
+    single, sequence, consume,
+    char, untilRegexFails, str,
+    predicate,
     prettyPrint
-} = require('../dist/index');
+} = require('../src');
+const { or, is, matches } = predicate;
 
 const Type = {
     curlyLeft: 'CURLY_LEFT',
@@ -73,6 +66,7 @@ const numberConsumer = state => {
 
     return;
 }
+const isNumber = or(is('-'), matches(/[0-9]/));
 
 const jsonTokenizer = Tokenizer()
     .onChar({
@@ -91,7 +85,7 @@ const jsonTokenizer = Tokenizer()
         't': consume(str('true'))(makeToken(Type.boolean)),
         'n': consume(str('null'))(makeToken(Type.nullVal)),
     })
-    .default(consume(numberConsumer)(makeToken(Type.number)))
+    .if(isNumber, consume(numberConsumer)(makeToken(Type.number)))
 ;
 
 console.log('-------------- JSON text ---------------');

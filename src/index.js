@@ -10,8 +10,8 @@
  * @param {string} text - Full text token belongs to
  * @returns {function(string|Symbol): function(string, number): Token}
  */
-const Token = text => type => (lexeme, offset) => ({ type, lexeme, offset, text });
-exports.Token = Token;
+const CreateToken = text => type => (lexeme, offset) => ({ type, lexeme, offset, text });
+exports.CreateToken = CreateToken;
 
 /**
  * @param {string|Symbol} type
@@ -98,6 +98,22 @@ const Tokenizer = function () {
      */
     T.default = reducer => {
         reducers.push(reducer);
+        return T;
+    }
+
+    /**
+     * @function
+     * Adds a reducer that is run if `predicate` is true for the current char
+     * @param {Predicate} predicate
+     * @param {Reducer} reducer - Reducer to run if `predicate` is true
+     */
+    T.if = (predicate, reducer) => {
+        const wrappedReducer = (char, state) => {
+            if (predicate(char)) return reducer(char, state);
+            else return { finished: false, tokens: [] };
+        }
+
+        reducers.push(wrappedReducer);
         return T;
     }
 

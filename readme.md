@@ -50,6 +50,7 @@ See [examples](examples)
 ## API
 The whole idea of tokenary is based off the idea of "reducers", which is probably not an accurate name but it's what they are called. These functions take in the state of the tokenizer and spit out some tokens. The `Tokenizer` object manages and triggers these reducers. More complex behavior is achieved by composing reducers together. See the [reducers](#Reducers) section for what is available.
 
+
 ### Tokenizer
 Created with a simple call to `Tokenizer()`, no `new` keyword.
 
@@ -66,8 +67,17 @@ Tokenizer().onChar({
 ```
 Will make a `COLON` token anytime a ':' is found (when called).
 
+#### if
+Property of a `Tokenizer` object. Call and pass in a `Predicate` and a `Reducer`. The reducer will be run when the predicate returns `true` for the current tokenizer character.
+
+Example:
+```js
+Tokenizer().if(is('a'), single(makeToken('LETTER_A')))
+```
+
 #### default
 Property of a `Tokenizer` object. Call and pass in a `Reducer`. The `default` property runs when all previous reducers fail.
+
 
 ### Token Creators
 #### makeToken
@@ -76,6 +86,7 @@ Available at top level of `tokenary` module.
 Call with a token type (a `Symbol` or a `string` preferably) and reducers can make tokens from this.
 
 Exact documenation: `tokenType => text => (lexeme, offset) => Token`
+
 
 ### Reducers
 All reducers are accessed via `require('tokenary').reducerName` or destructoring or whatever. Available at top level of module.
@@ -101,6 +112,7 @@ sequence(char('"'), untilRegexFails(/^[^"]$*/), char('"'))(makeToken('string'))
 #### consume
 Runs the single consumer passed to it, then runs the specified `TokenCreator` with the characters consumed. Very similar to [sequence](#sequence)
 
+
 ### Consumers
 Consumers are used to "eat" characters from the text. Pass these to specific reducers.
 #### char
@@ -117,6 +129,56 @@ Consumes all whitespace characters (` `, `\n`, `\f`, `\r`, `\t`, `\v`) until it 
 
 #### str
 Consumes the specified string. Throws an error if it fails to match the string.
+
+
+### Predicates
+Predicates are available in `require('tokenary').predicate`
+
+#### is
+`is(truth)(actual)`
+
+Returns true if `actual === truth`
+
+#### isOneOf
+`isOneOf(...truths)(actual)`
+
+Returns true if `actual` matches anything in `truths`
+
+#### matches
+`matches(regex)(actual)`
+
+Returns true if `actual` matches the regular expression.
+
+#### not
+`not(predicate)`
+
+Negates the return value of the predicate argument.
+
+#### or
+`or(...predicates)`
+
+Returns true if any of the predicates are true.
+
+#### nor
+`nor(...predicates)`
+
+Shorthand for `not(or)`
+
+#### and
+`and(...predicates)`
+
+Returns true if all of the predicates are true.
+
+#### nand
+`nand(...predicates)`
+
+Shorthand for `not(and)`
+
+#### xor
+`xor(predicate1, predicate1)`
+
+Returns true if only either, but not both, of the predicates is true.
+
 
 ### Miscellaneous
 #### Token
