@@ -2,13 +2,13 @@
   "name": "tokenary",
   "version": "0.0.1",
   "description": "Library for building tokenizers",
-  "main": "index.js",
+  "main": "dist/index.js",
   "repository": "github.com/craigmc08/tokenary",
   "author": "craigmc08",
   "license": "MIT",
   "scripts": {
     "test": "npm run build && jest",
-    "build": "babel ./index.mjs -o ./dist/index.js"
+    "build": "babel ./src/index.mjs -o ./dist/index.js"
   },
   "devDependencies": {
     "@babel/cli": "^7.2.3",
