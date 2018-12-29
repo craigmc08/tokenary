@@ -125,6 +125,11 @@ export const Tokenizer = function () {
  * @returns {function(string, number): Token}
  */
 
+
+/**************************
+    BUILT-IN REDUCERS
+ ***************************/
+
 /**
  * Creates a token for every character after the reducer is run
  * @param {TokenCreator} tokenCreator
@@ -175,6 +180,8 @@ export const single = tokenCreator => (char, state) => {
         tokens: [tokenCreator(state.text)(char, state.getCurrent() - 1)],
     };
 }
+
+
 
 /**************************
     UTILITY FUNCTIONS
