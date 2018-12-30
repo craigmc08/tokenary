@@ -112,7 +112,7 @@ test('consume should consume characters from one consumer and create a token', (
     expect(consumeTest(text)).toEqual(expected);
 });
 
-describe('if should run the given reducer if the predicate is true', () => {
+test('if should run the given reducer if the predicate is true', () => {
     const isVowel = matches(/[aeiou]/);
     const isConsonant = not(isVowel);
 
