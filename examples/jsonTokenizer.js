@@ -81,11 +81,13 @@ const jsonTokenizer = Tokenizer()
             untilRegexFails(/^(\\"|[^"\n])*$/),
             char('"'),
         )(makeToken(Type.string)),
-        'f': consume(str('false'))(makeToken(Type.boolean)),
-        't': consume(str('true'))(makeToken(Type.boolean)),
-        'n': consume(str('null'))(makeToken(Type.nullVal)),
     })
     .if(isNumber, consume(numberConsumer)(makeToken(Type.number)))
+    .keywords({
+        'true': makeToken(Type.boolean),
+        'false': makeToken(Type.boolean),
+        'null': makeToken(Type.nullVal),
+    });
 ;
 
 console.log('-------------- JSON text ---------------');
