@@ -349,7 +349,7 @@ exports.regex = regex;
 const untilRegexFails = regex => state => {
     const start = state.getCurrent();
     const nextPiece = () => state.text.substring(start, state.getCurrent() + 1);
-    while (regex.test(nextPiece())) state.advance();
+    while (regex.test(nextPiece()) && !state.atEnd()) state.advance();
 }
 exports.untilRegexFails = untilRegexFails;
 
@@ -360,7 +360,7 @@ exports.untilRegexFails = untilRegexFails;
 const whitespace = () => state => {
     const chars = [' ', '\f', '\n', '\r', '\t', '\v'];
     if (chars.includes(state.look())) return;
-    while (chars.includes(state.peek())) state.advance();
+    while (chars.includes(state.peek()) && !state.atEnd()) state.advance();
 }
 exports.whitespace = whitespace;
 
