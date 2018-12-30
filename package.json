@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "description": "Library for building tokenizers",
   "main": "src/index.js",
-  "repository": "github.com/craigmc08/tokenary",
+  "repository": "https://github.com/craigmc08/tokenary",
   "author": "craigmc08",
   "license": "MIT",
   "scripts": {
