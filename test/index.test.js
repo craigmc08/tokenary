@@ -131,6 +131,31 @@ test('if should run the given reducer if the predicate is true', () => {
     expect(wordCategorizer(text)).toEqual(expected);
 });
 
+test('keywords should find the listed keywords', () => {
+    const keywordExtractor = Tokenizer()
+        .keywords({
+            'and': makeToken('and'),
+            'or': makeToken('or'),
+            'not': makeToken('not'),
+        })
+        .default(everythingUntil(' ')(makeToken('text')))
+    ;
+
+    const text = 'horses and not butterflies or beesnot';
+
+    const makeAnd = o => CreateToken(text)('and')('and', o);
+    const makeOr = o => CreateToken(text)('or')('or', o);
+    const makeNot = o => CreateToken(text)('not')('not', o);
+    const makeText = CreateToken(text)('text');
+
+    const expected = [
+        makeText('horses', 0), makeAnd(7), makeNot(11),
+        makeText('butterflies', 15), makeOr(27), makeText('beesnot', 30),
+    ];
+
+    expect(keywordExtractor(text)).toEqual(expected);
+});
+
 test('prettyPrint should format the tokens nicely for viewing', () => {
     const csv = Tokenizer()
         .onChar({

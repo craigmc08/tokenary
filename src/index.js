@@ -119,6 +119,44 @@ const Tokenizer = function () {
 
     /**
      * @function
+     * Adds a reducer that extracts keywords from the keyword map, running the token creator for each.
+     * @param {Object.<string, TokenCreator} keywordMap
+     * @returns {Reducer}
+     */
+    T.keywords = keywordMap => {
+        const keywords = Object.keys(keywordMap).filter(k => k !== '');
+        const reducer = (char, state) => {
+            // Holy indent batman
+            for (keyword of keywords) {
+                // Only check letters if there is enough text until the end
+                // The '+ 1' accounts for the first char already being advanced past
+                if (state.text.length - state.getCurrent() + 1 >= keyword.length) {
+                    // Check if each letter matches (looking into the future)
+                    const allLettersMatch = keyword.split('').reduce(
+                        (res, letter, i) => res && letter === state.text[state.getCurrent() + i - 1]
+                    );
+                    if (allLettersMatch) {
+                        // Advance past all the keyword's letters
+                        const start = state.getCurrent() - 1;
+                        for (let i = 1; i < keyword.length; i++) state.advance();
+                        return {
+                            finished: true,
+                            tokens: [ keywordMap[keyword](state.text)(keyword, start) ],
+                        };
+                    }
+                }
+            }
+
+            // No keyword matched, return
+            return { finished: false, tokens: [] };
+        }
+
+        reducers.push(reducer);
+        return T;
+    }
+
+    /**
+     * @function
      * Calls the reducer if the character matches a reducer in the supplied map
      * @param {Object.<string, Reducer>} reducerMap - character:reducer map to check
      * @returns {Reducer}

@@ -75,6 +75,15 @@ Example:
 Tokenizer().if(is('a'), single(makeToken('LETTER_A')))
 ```
 
+#### keywords
+Property of a `Tokenizer` object. Takes an object containing a map of keyword to `TokenCreator`. When a keyword is found, the specified `TokenCreator` is run.
+
+Example:
+```js
+Tokenizer().keywords({ 'and': makeToken('and'), 'or': makeToken('or') });
+```
+*Keep in mind: the values of the map should be a `TokenCreator`, not a `Reducer` like in [onChar](#onChar)
+
 #### default
 Property of a `Tokenizer` object. Call and pass in a `Reducer`. The `default` property runs when all previous reducers fail.
 
