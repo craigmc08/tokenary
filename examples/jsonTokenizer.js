@@ -87,7 +87,7 @@ const jsonTokenizer = Tokenizer()
         'true': makeToken(Type.boolean),
         'false': makeToken(Type.boolean),
         'null': makeToken(Type.nullVal),
-    });
+    })
 ;
 
 console.log('-------------- JSON text ---------------');

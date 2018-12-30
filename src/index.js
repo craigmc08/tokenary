@@ -98,7 +98,7 @@ const Tokenizer = function Tokenizer () {
         while (!atEnd()) {
             const char = advance();
             reducers.reduce((finished, reducer) => {
-                if (finished) return;
+                if (finished) return true;
                 const state = reducer(char, tokState);
                 const newToks = state.tokens.filter(token => token !== null);
                 output.push(...newToks);
@@ -188,8 +188,8 @@ const Tokenizer = function Tokenizer () {
     
             // Acts as a kind of switch block, then sets final state to state of whichever reducer is run
             Object.keys(reducerMap).reduce((finished, charKey) => {
-                if (finished) return;
-                if (char !== charKey) return finished;
+                if (finished) return true;
+                if (char !== charKey) return false;
     
                 const redState = reducerMap[charKey](char, state);
                 finalState.finished = redState.finished;
