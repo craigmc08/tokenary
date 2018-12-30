@@ -190,7 +190,7 @@ Returns true if only either, but not both, of the predicates is true.
 
 
 ### Miscellaneous
-#### Token
+#### CreateToken
 Available at top level of module `tokenary`. Slightly re-ordered version of `makeToken`.
 
 *Note: Do **NOT** use as a `TokenCreator` in a Tokenizer. It will not behave correctly, but it will not error either.*
