@@ -1,11 +1,18 @@
 /**
+ * Functions that return true or false.
+ * @namespace predicate
+ */
+
+/**
  * @callback Predicate
+ * @memberof predicate
  * @param {any} actual
  * @returns {boolean}
  */
 
  /**
   * Checks if actual is strict equal (===) to truth
+  * @memberof predicate
   * @param {any} truth
   * @returns {Predicate}
   */
@@ -14,6 +21,7 @@ exports.is = is;
 
 /**
  * Checks if actual is any of the values in truths
+ * @memberof predicate
  * @param {...any} truths
  * @returns {Predicate}
  */
@@ -22,6 +30,7 @@ exports.isOneOf = isOneOf;
 
 /**
  * Checks if actual matches the regular expression
+ * @memberof predicate
  * @param {RegExp} regex 
  * @returns {Predicate}
  */
@@ -32,6 +41,7 @@ exports.matches = matches;
 
 /**
  * Logical not operator on a predicate
+ * @memberof predicate
  * @param {Predicate} predicate
  * @returns {Predicate}
  */
@@ -40,6 +50,7 @@ exports.not = not;
 
 /**
  * Logical or operator on predicates
+ * @memberof predicate
  * @param {...Predicate} predicates
  * @returns {Predicate}
  */
@@ -49,6 +60,7 @@ exports.or = or;
 
 /**
  * Logical nor operator on predicates. Short for not(or(...predicates))
+ * @memberof predicate
  * @param {...Predicate} predicates
  * @returns {Predicate}
  */
@@ -57,6 +69,7 @@ exports.nor = nor;
 
 /**
  * Logical and operator on predicates
+ * @memberof predicate
  * @param {...Predicate} predicates
  * @returns {Predicate}
  */
@@ -66,6 +79,7 @@ exports.and = and;
 
 /**
  * Logical nand operator on predicates. Short for not(and(...predicates))
+ * @memberof predicate
  * @param {...Predicate} predicates
  * @returns {Predicate}
  */
@@ -74,6 +88,7 @@ exports.nand = nand;
 
 /**
  * Logical xor operator on 2 predicates
+ * @memberof predicate
  * @param {Predicate} predicate1
  * @param {Predicate} predicate2
  * @returns {Predicate}

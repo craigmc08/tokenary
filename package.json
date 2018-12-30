@@ -7,10 +7,13 @@
   "author": "craigmc08",
   "license": "MIT",
   "scripts": {
-    "test": "jest"
+    "test": "jest",
+    "docs": "jsdoc2md --template ./readme.hbs -f ./src/index.js ./src/predicate.js > readme.md"
   },
   "devDependencies": {
     "eslint": "^5.11.1",
-    "jest": "^23.6.0"
+    "jest": "^23.6.0",
+    "jsdoc": "^3.5.5",
+    "jsdoc-to-markdown": "^4.0.1"
   }
 }

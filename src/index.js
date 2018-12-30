@@ -7,20 +7,25 @@
  */
 
 /**
+ * Creates a token object
  * @param {string} text - Full text token belongs to
- * @returns {function(string|Symbol): function(string, number): Token}
+ * @returns {function(string): function(string, number): Token}
  */
 const CreateToken = text => type => (lexeme, offset) => ({ type, lexeme, offset, text });
 exports.CreateToken = CreateToken;
 
 /**
- * @param {string|Symbol} type
+ * Creates a token object
+ * @type {TokenCreator}
+ * @param {string} type
  * @returns {function(string): function(string, number): Token}
  */
 const makeToken = type => text => (lexeme, offset) => ({ type, lexeme, offset, text });
 exports.makeToken = makeToken;
 
 /**
+ * Creates a null token (ignored by Tokenizer)
+ * @type {TokenCreator}
  * @param {string} text
  * @returns {function(string, number): null}
  */
@@ -52,14 +57,27 @@ exports.makeNothing = makeNothing;
  * @returns {ReducerState} Information about the reducer after it is finished
  */
 
-const Tokenizer = function () {
+/**
+ * @typedef Tokenary
+ * @property {function(Reducer): Tokenary} default
+ * @property {function(Predicate, Reducer): Tokenary} if
+ * @property {function(Object.<string, TokenCreator>): Tokenary} keywords
+ * @property {function(Object.<string, Reducer>): Tokenary} onChar
+ * 
+ * Parses the text into tokens based on the rules given to it
+ * @function Tokenary
+ * @param {string} text - The text to tokenize
+ * @returns {Token[]}
+ */
+
+/**
+ * Creates a Tokenizer object
+ * @returns {Tokenary}
+ */
+const Tokenizer = function Tokenizer () {
     /** @type {Reducer[]} */
     const reducers = [];
 
-    /**
-     * Tokenizes the text
-     * @param {string} text - The full text to tokenize
-     */
     const T = function (text) {
         const output = [];
 
@@ -92,8 +110,8 @@ const Tokenizer = function () {
     }
 
     /**
-     * @function
      * Adds a reducer that is run whenever it is reached
+     * @function default
      * @param {Reducer} reducer
      */
     T.default = reducer => {
@@ -102,8 +120,8 @@ const Tokenizer = function () {
     }
 
     /**
-     * @function
      * Adds a reducer that is run if `predicate` is true for the current char
+     * @function if
      * @param {Predicate} predicate
      * @param {Reducer} reducer - Reducer to run if `predicate` is true
      */
@@ -118,9 +136,9 @@ const Tokenizer = function () {
     }
 
     /**
-     * @function
      * Adds a reducer that extracts keywords from the keyword map, running the token creator for each.
-     * @param {Object.<string, TokenCreator} keywordMap
+     * @function keywords
+     * @param {Object.<string, TokenCreator>} keywordMap
      * @returns {Reducer}
      */
     T.keywords = keywordMap => {
@@ -156,8 +174,8 @@ const Tokenizer = function () {
     }
 
     /**
-     * @function
      * Calls the reducer if the character matches a reducer in the supplied map
+     * @function onChar
      * @param {Object.<string, Reducer>} reducerMap - character:reducer map to check
      * @returns {Reducer}
      */
@@ -222,7 +240,7 @@ const everything = tokenCreator => (char, state) => {
 exports.everything = everything;
 
 /**
- * 
+ * Creates a token for every character until a character matches one given
  * @param {...string} chars - Characters to possibly match
  * @returns {function(TokenCreator): Reducer}
  */
@@ -257,7 +275,7 @@ const single = tokenCreator => (char, state) => {
 exports.single = single;
 
 /**
- * 
+ * Runs all the consumers given and creates a token from what they consume
  * @param {...Consumer} consumers
  * @returns {function(TokenCreator): Reducer}
  */
@@ -365,6 +383,7 @@ exports.str = str;
  ***************************/
 
 /**
+ * Formats a single token
  * @param {Token} token
  */
 const stringifyToken =
