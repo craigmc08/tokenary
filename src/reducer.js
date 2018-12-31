@@ -162,7 +162,7 @@ const consume = reducer => tokenCreator => state => {
     const start = state.current;
     const finalState = reducer(state);
 
-    if (finalState.current === state.current) {
+    if (finalState === null || finalState.current === state.current) {
         // Nothing was consumed, so don't modify state
         return null;
     }
@@ -184,7 +184,7 @@ exports.consume = consume;
  * @returns {Reducer}
  */
 const sequence = reducers => state => {
-    return reducers.reduce((s, reducer) => reducer(s), state);
+    return reducers.reduce((s, reducer) => reducer(s) || s, state);
 }
 exports.sequence = sequence;
 
