@@ -1,3 +1,6 @@
+const TokenError = require('./TokenError');
+exports.TokenError = TokenError;
+
 /**
  * @typedef Token
  * @property {string|Symbol} type - Type of token
@@ -31,6 +34,16 @@ exports.makeToken = makeToken;
  */
 const makeNothing = text => (lexeme, offset) => null;
 exports.makeNothing = makeNothing;
+
+/**
+ * Throws an error
+ * @type {TokenCreator}
+ * @param {string} message - The message the error has
+ * @returns {function(string, number): null}
+ */
+const makeError = message => text => (lexeme, offset) => {
+    throw new TokenError(message, lexeme, offset)
+}
 
 /**
  * @typedef TokState
