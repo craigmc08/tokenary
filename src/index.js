@@ -1,3 +1,6 @@
+const TokenError = require('./TokenError');
+exports.TokenError = TokenError;
+
 /**
  * @typedef Token
  * @property {string|Symbol} type - Type of token
@@ -33,6 +36,17 @@ const makeNothing = text => (lexeme, offset) => null;
 exports.makeNothing = makeNothing;
 
 /**
+ * Throws an error
+ * @type {TokenCreator}
+ * @param {string} message - The message the error has
+ * @returns {function(string, number): null}
+ */
+const makeError = message => text => (lexeme, offset) => {
+    throw new TokenError(message, lexeme, offset)
+}
+exports.makeError = makeError;
+
+/**
  * @typedef TokState
  * @property {function(): string} advance - Advance the tokenizer 1 character forward
  * @property {function(): string} retreat - Moves the tokenizer 1 character back
@@ -60,6 +74,7 @@ exports.makeNothing = makeNothing;
 /**
  * @typedef Tokenary
  * @property {function(Reducer): Tokenary} default
+ * @property {function(TokenCreator): Tokenary} catch
  * @property {function(Predicate, Reducer): Tokenary} if
  * @property {function(Object.<string, TokenCreator>): Tokenary} keywords
  * @property {function(Object.<string, Reducer>): Tokenary} onChar
@@ -77,6 +92,7 @@ exports.makeNothing = makeNothing;
 const Tokenizer = function Tokenizer () {
     /** @type {Reducer[]} */
     const reducers = [];
+    let catcher = null;
 
     const T = function (text) {
         const output = [];
@@ -97,13 +113,26 @@ const Tokenizer = function Tokenizer () {
 
         while (!atEnd()) {
             const char = advance();
-            reducers.reduce((finished, reducer) => {
-                if (finished) return true;
-                const state = reducer(char, tokState);
-                const newToks = state.tokens.filter(token => token !== null);
-                output.push(...newToks);
-                return state.finished;
-            }, false);
+            try {
+                reducers.reduce((finished, reducer) => {
+                    if (finished) return true;
+                    const state = reducer(char, tokState);
+                    const newToks = state.tokens.filter(token => token !== null);
+                    output.push(...newToks);
+                    return state.finished;
+                }, false);
+            } catch (err) {
+                // If it's a TokenError, create (and the catcher exists)
+                // create a token from it
+                if (err instanceof TokenError && catcher !== null) {
+                    const tok = catcher(err.text)(err.lexeme, err.offset);
+                    tok.message = err.message;
+                    output.push(tok);
+                } else {
+                    // Otherwise just throw the error again
+                    throw err;
+                }
+            }
         }
 
         return output;
@@ -139,34 +168,47 @@ const Tokenizer = function Tokenizer () {
      * Adds a reducer that extracts keywords from the keyword map, running the token creator for each.
      * @function keywords
      * @param {Object.<string, TokenCreator>} keywordMap
+     * @param {object} [settings] - keywords parsing settings
+     * @param {(RegExp)} [settings.charset] - Charset allowed for a keyword
+     * @param {(string|RegExp)} [settings.firstChar] - Charset allowed for first character of keyword
+     * @param {TokenCreator} [settings.noMatch] - Token creator to use on invalid keywords, nothing happens if not supplied
      * @returns {Reducer}
      */
-    T.keywords = keywordMap => {
+    T.keywords = (keywordMap, settings) => {
+        const { noMatch, charset, firstChar } = Object.assign({}, {
+            charset: /^[a-z0-9_]+$/i,
+            firstChar: /^[a-z]+$/i,
+            noMatch: null
+        });
+
         const keywords = Object.keys(keywordMap).filter(k => k !== '');
         const reducer = (char, state) => {
-            // Holy indent batman
-            for (keyword of keywords) {
-                // Only check letters if there is enough text until the end
-                // The '+ 1' accounts for the first char already being advanced past
-                if (state.text.length - state.getCurrent() + 1 >= keyword.length) {
-                    // Check if each letter matches (looking into the future)
-                    const allLettersMatch = keyword.split('').reduce(
-                        (res, letter, i) => res && letter === state.text[state.getCurrent() + i - 1]
-                    );
-                    if (allLettersMatch) {
-                        // Advance past all the keyword's letters
-                        const start = state.getCurrent() - 1;
-                        for (let i = 1; i < keyword.length; i++) state.advance();
-                        return {
-                            finished: true,
-                            tokens: [ keywordMap[keyword](state.text)(keyword, start) ],
-                        };
-                    }
-                }
-            }
+            // Ensure first character is valid
+            if (!firstChar.test(char)) return { finished: false, tokens: [] };
 
-            // No keyword matched, return
-            return { finished: false, tokens: [] };
+            // Find the keyword
+            const start = state.getCurrent() - 1;
+            while (charset.test(state.peek()) && !state.atEnd()) state.advance();
+            const word = state.text.substring(start, state.getCurrent());
+
+            if (keywords.includes(word)) {
+                // Check if it is a keyword
+                return {
+                    finished: true,
+                    tokens: [ keywordMap[word](state.text)(word, start) ],
+                };
+            } else if (noMatch !== null) {
+                // If not, check for a noMatch creator
+                return {
+                    finished: true,
+                    tokens: [ noMatch(state.text)(word, start) ],
+                };
+            } else {
+                // Nothing should happen
+                // Rewind time to before this reducer happened
+                while (state.getCurrent() > start + 1) state.retreat();
+                return { finished: false, tokens: [] };
+            }
         }
 
         reducers.push(reducer);
@@ -202,6 +244,12 @@ const Tokenizer = function Tokenizer () {
         }
 
         reducers.push(reducer);
+        return T;
+    }
+
+    T.catch = tokenCreator => {
+        catcher = tokenCreator;
+
         return T;
     }
 

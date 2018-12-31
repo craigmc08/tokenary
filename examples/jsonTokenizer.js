@@ -1,6 +1,6 @@
 const {
     Tokenizer,
-    Token, makeToken,
+    Token, makeToken, makeError,
     single, sequence, consume,
     char, untilRegexFails, str,
     predicate,
@@ -87,6 +87,8 @@ const jsonTokenizer = Tokenizer()
         'true': makeToken(Type.boolean),
         'false': makeToken(Type.boolean),
         'null': makeToken(Type.nullVal),
+    }, {
+        noMatch: makeError('Invalid keyword'),
     })
 ;
 

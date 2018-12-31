@@ -1,24 +1,9 @@
 const {
-    Tokenizer,
-
-    CreateToken,
-    makeToken,
-    makeNothing,
-
-    everything,
-    everythingUntil,
-    single,
-    sequence,
-    consume,
-
-    char,
-    regex,
-    untilRegexFails,
-    whitespace,
-    str,
-
+    Tokenizer, TokenError,
+    CreateToken, makeToken, makeNothing,
+    everything, everythingUntil, single, sequence, consume,
+    char, regex, untilRegexFails, whitespace, str,
     prettyPrint,
-
     predicate,
 } = require('../src');
 
@@ -95,6 +80,35 @@ describe('Controllers', () => {
         ];
 
         expect(keywordExtractor(text)).toEqual(expected);
+    });
+
+    test('catch should catch errors thrown anywhere in tokenizer', () => {
+        const faultyConsumer = state => {
+            const start = state.getCurrent();
+            state.advance();
+            if (state.peek() !== ':') {
+                state.advance();
+                const lexeme = state.text.substring(start, state.getCurrent());
+                throw new TokenError(`Expected ':', got '${state.peek()}'`, lexeme, start, state.text);
+            }
+            state.advance();
+        }
+
+        const tokenizer = Tokenizer()
+            .onChar({
+                ':': consume(faultyConsumer)(makeToken('cc')),
+            })
+            .catch(makeToken('error'))
+        ;
+
+        const text = ':::,,,::';
+        const expected = [
+            CreateToken(text)('cc')('::', 0),
+            Object.assign(CreateToken(text)('error')(':,', 2), { message: `Expected ':', got ','` }),
+            CreateToken(text)('cc')('::', 6),
+        ];
+
+        expect(tokenizer(text)).toEqual(expected);
     });
 });
 
