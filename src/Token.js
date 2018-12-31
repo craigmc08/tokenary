@@ -58,7 +58,7 @@ exports.stringifyToken = stringifyToken;
  * @returns {string}
  */
 const prettyPrint = tokens =>
-    '[\n'
+    '[\n  '
     + tokens.map(stringifyToken).join(',\n  ')
     + '\n]'
 exports.prettyPrint = prettyPrint;
