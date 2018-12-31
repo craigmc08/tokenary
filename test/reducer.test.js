@@ -1,7 +1,7 @@
 const {
     keywords, ifThen, ifChar,
-    everything, everythingUntil, single, consume, sequence,
-    char, untilRegexFails, whitespace
+    everything, everythingUntil, single, consume,
+    sequence, char, untilRegexFails, whitespace
 } = require('../src/reducer');
 const { makeToken } = require('../src/Token');
 const { create, advance } = require('../src/TokState');
@@ -27,6 +27,30 @@ describe('untilRegexFails', () => {
 
 test('whitespace should work', () => {
     expect(whitespace(create('   h'))).toEqual(create('   h', 3, []));
+});
+
+describe('sequence', () => {
+    const R = sequence([
+        char('a'),
+        char(':'),
+        char('b')
+    ]);
+    const text = 'a:b b:a';
+
+    test('sequence should run all reducers in order', () => {
+        const expected = create(text, 3, []);
+        expect(R(create(text))).toEqual(expected);
+    });
+
+    test('sequence should revert to previous state if a reducer returns null', () => {
+        const R2 = sequence([
+            untilRegexFails(/^[a:]*$/),
+            state => null, // Custom reducer function
+            char('b')
+        ]);
+        const expected = create(text, 3, []);
+        expect(R2(create(text))).toEqual(expected);
+    });
 });
 
 test('everything should make a token from everything', () => {
@@ -65,6 +89,29 @@ test('single should make a token from a single character', () => {
     
     expect(R(create(text))).toEqual(create(text, 1, [ makeToken('char')('o', 0) ]));
     expect(R(create(text, 2))).toEqual(create(text, 3, [ makeToken('char')('f', 2) ]));
+});
+
+describe('consume', () => {
+    const R = consume(untilRegexFails(/^[^\s]*$/))(makeToken('word'));
+    const text = 'word1 word2';
+
+    test('consume should create a token from the change in current from the reducer passed in', () => {
+        expect(R(create(text))).toEqual(create(text, 5, [
+            makeToken('word')('word1', 0)
+        ]));
+        expect(R(create(text, 6))).toEqual(create(text, 12, [
+            makeToken('word')('word2', 6)
+        ]));
+    });
+
+    test('consume should return null when the change is 0', () => {
+        expect(R(create(text, 5))).toBe(null);
+    });
+
+    test('consume should return null when its reducer returns null', () => {
+        const R2 = consume(() => null)(makeToken('word'));
+        expect(R2(create(text))).toBe(null);
+    });
 });
 
 describe('keywords', () => {
@@ -111,5 +158,15 @@ describe('ifChar', () => {
     const R = ifChar({
         ',': single(makeToken('comma')),
         '\n': single(makeToken('line'))
+    });
+    const text = ',o\n';
+
+    test('ifChar should run the reducer when matching a char', () => {
+        expect(R(create(text))).toEqual(create(text, 1, [ makeToken('comma')(',', 0) ]));
+        expect(R(create(text, 2))).toEqual(create(text, 3, [ makeToken('line')('\n', 2) ]));
+    });
+
+    test('ifChar should return null when it doesn\'t match a character', () => {
+        expect(R(create(text, 1))).toBe(null);
     });
 });
