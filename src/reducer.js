@@ -27,6 +27,7 @@ const TokenError = require('./TokenError');
 
  /**
   * Extracts keywords from the text
+  * @memberof reducer
   * @param {Object.<string, TokenCreator>} keywordMap - Map of keywords to check for
   * @param {object} [settings]
   * @param {RegExp} [settings.charset] - Charset allowed for a keyword
@@ -69,6 +70,7 @@ exports.keywords = keywords;
 
 /**
  * If the predicate is true, run the reducer
+ * @memberof reducer
  * @param {Predicate} predicate - Condition to be met
  * @returns {function(Reducer): Reducer}
  */
@@ -79,6 +81,7 @@ exports.ifThen = ifThen;
 
 /**
  * If a matching character is found, runs the given reducer
+ * @memberof reducer
  * @param {Object.<string, Reducer>} reducerMap - character to reducer map to check
  * @returns {Reducer}
  */
@@ -145,6 +148,7 @@ exports.single = single;
 /**
  * Creates a token from the characters passed over in the given reducer
  * Expects the given reducers to not return any tokens
+ * @memberof reducer
  * @param {Reducer} reducer
  * @returns {function(TokenCreator): Reducer}
  */
@@ -189,6 +193,7 @@ exports.char = char;
 
 /**
  * Runs the regex until the regex fails on all characters advanced past
+ * @memberof reducer
  * @param {RegExp} regex 
  * @returns {Reducer}
  */
@@ -205,6 +210,9 @@ exports.untilRegexFails = untilRegexFails;
 
 /**
  * Advances past all contiguous whitespace characters
+ * @memberof reducer
+ * @function
+ * @type {Reducer}
  */
 const whitespace = untilRegexFails(/^\s*$/);
 exports.whitespace = whitespace;
