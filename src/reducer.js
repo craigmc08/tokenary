@@ -76,6 +76,7 @@ exports.keywords = keywords;
  */
 const ifThen = predicate => reducer => state => {
     if (predicate(tokState.peek(state))) return reducer(state);
+    return null;
 }
 exports.ifThen = ifThen;
 
@@ -105,12 +106,12 @@ const everything = tokenCreator => state => {
     let finalState = state;
     const start = state.current;
     // Advance state until the end is reached
-    while (!tokState.atEnd(state)) {
+    while (!tokState.atEnd(finalState)) {
         finalState = tokState.advance(finalState);
     }
 
     // Add token
-    return tokState.addToken(finalState, tokenCreator(tokState.segmentFrom(state, start), start));
+    return tokState.addToken(finalState, tokenCreator(tokState.segmentFrom(finalState, start), start));
 }
 exports.everything = everything;
 
@@ -124,12 +125,16 @@ const everythingUntil = chars => tokenCreator => state => {
     let finalState = state;
     const start = state.current;
     // Advance until end or one of the parameters characters is reached
-    while (!tokState.atEnd(state) && !chars.includes(tokState.peek(state))) {
+    while (!tokState.atEnd(finalState) && !chars.includes(tokState.peek(finalState))) {
         finalState = tokState.advance(finalState);
     }
 
+    if (finalState.current === state.current) {
+        // No leters were consumed, so don't modify state
+        return null;
+    }
     // Add token
-    return tokState.addToken(finalState, tokenCreator(tokState.segmentFrom(state, start), start));
+    return tokState.addToken(finalState, tokenCreator(tokState.segmentFrom(finalState, start), start));
 }
 exports.everythingUntil = everythingUntil;
 
@@ -156,7 +161,13 @@ exports.single = single;
 const consume = reducer => tokenCreator => state => {
     const start = state.current;
     const finalState = reducer(state);
-    return tokState.addToken(finalState, tokenCreator(tokState.segmentFrom(state, start), start))
+
+    if (finalState.current === state.current) {
+        // Nothing was consumed, so don't modify state
+        return null;
+    }
+    // Add the token
+    return tokState.addToken(finalState, tokenCreator(tokState.segmentFrom(finalState, start), start))
 }
 exports.consume = consume;
 

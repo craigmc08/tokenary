@@ -14,7 +14,7 @@ test('makeNothing should return null', () => {
 });
 
 test('makeError should throw a TokenError', () => {
-    expect(makeError('Test error')('dog', 7)).toThrow(new TokenError('Test error', 'dog', 7));
+    expect(makeError('Test error')).toThrow();
 });
 
 test('stringifyToken should format a single token', () => {
