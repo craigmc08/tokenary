@@ -1,25 +1,9 @@
 const {
-    Tokenizer,
-    TokenError,
-
-    CreateToken,
-    makeToken,
-    makeNothing,
-
-    everything,
-    everythingUntil,
-    single,
-    sequence,
-    consume,
-
-    char,
-    regex,
-    untilRegexFails,
-    whitespace,
-    str,
-
+    Tokenizer, TokenError,
+    CreateToken, makeToken, makeNothing,
+    everything, everythingUntil, single, sequence, consume,
+    char, regex, untilRegexFails, whitespace, str,
     prettyPrint,
-
     predicate,
 } = require('../src');
 
