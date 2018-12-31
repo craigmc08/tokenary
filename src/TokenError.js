@@ -3,7 +3,7 @@ class TokenError extends Error {
      * 
      * @param {string} message - The error message
      * @param {string} lexeme - The lexeme this error is for
-     * @param {string} offset - The index of the first lexeme character in the text
+     * @param {number} offset - The index of the first lexeme character in the text
      * @param {string} text - The text that generated this error
      */
     constructor(message, lexeme, offset, text) {
