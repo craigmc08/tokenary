@@ -25,7 +25,7 @@ const text = `{
     "name": "Fred Francis",
     "age": 17,
     "hasLicense": false,
-    "licenseNumber": null,
+    "licenseNumber": nill,
     "friends": [
         "Sally Salamander",
         "Jeffrey Jenkins",

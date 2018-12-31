@@ -179,7 +179,7 @@ const Tokenizer = function Tokenizer () {
             charset: /^[a-z0-9_]+$/i,
             firstChar: /^[a-z]+$/i,
             noMatch: null
-        });
+        }, settings);
 
         const keywords = Object.keys(keywordMap).filter(k => k !== '');
         const reducer = (char, state) => {
