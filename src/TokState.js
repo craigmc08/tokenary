@@ -1,4 +1,8 @@
 /**
+ * @typedef {import("./Token").Token} Token
+ */
+
+/**
  * @typedef TokState
  * @property {string} text - The text represented by the state
  * @property {number} current - Current offset in text

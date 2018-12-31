@@ -1,4 +1,10 @@
-const TokState = require('./TokState');
+const tokState = require('./TokState');
+
+/**
+ * @typedef {import("./reducer").Reducer} Reducer
+ * @typedef {import("./Token").Token} Token
+ * @typedef {import("./TokState").TokState} TokState
+ */
 
 /**
  * Creates a tokenizing function
@@ -11,10 +17,10 @@ function Tokenary(reducers) {
     return function Tokenize(text) {
         if (typeof text !== 'string') throw new TypeError('No text given to tokenize');
         // Create initial state
-        let state = TokState.create(text);
+        let state = tokState.create(text);
 
         // Loop through the state until it reaches the end
-        while (!TokState.atEnd(state)) {
+        while (!tokState.atEnd(state)) {
             // Loop through each reducer, checking for a new state
             const nextState = reducers.reduce((foundState, reducer) => {
                 if (foundState !== null) return foundState;                
@@ -24,7 +30,7 @@ function Tokenary(reducers) {
             // If a new state was made, update the state
             if (nextState !== null) state = nextState;
             // Otherwise, advance the state
-            else state = TokState.advance(state);
+            else state = tokState.advance(state);
         }
 
         // Return the tokens found
