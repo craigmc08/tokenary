@@ -93,6 +93,7 @@ const ifChar = reducerMap => state => {
         return null;
     }
 }
+exports.ifChar = ifChar;
 
  /**
   * Creates a token from every character that follows
