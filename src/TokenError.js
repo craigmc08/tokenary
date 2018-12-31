@@ -13,3 +13,4 @@ class TokenError extends Error {
         this.text = text;
     }
 }
+module.exports = TokenError;

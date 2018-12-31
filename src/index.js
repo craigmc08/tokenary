@@ -73,6 +73,7 @@ const makeError = message => text => (lexeme, offset) => {
 /**
  * @typedef Tokenary
  * @property {function(Reducer): Tokenary} default
+ * @property {function(TokenCreator): Tokenary} catch
  * @property {function(Predicate, Reducer): Tokenary} if
  * @property {function(Object.<string, TokenCreator>): Tokenary} keywords
  * @property {function(Object.<string, Reducer>): Tokenary} onChar
@@ -90,6 +91,7 @@ const makeError = message => text => (lexeme, offset) => {
 const Tokenizer = function Tokenizer () {
     /** @type {Reducer[]} */
     const reducers = [];
+    let catcher = null;
 
     const T = function (text) {
         const output = [];
@@ -110,13 +112,26 @@ const Tokenizer = function Tokenizer () {
 
         while (!atEnd()) {
             const char = advance();
-            reducers.reduce((finished, reducer) => {
-                if (finished) return true;
-                const state = reducer(char, tokState);
-                const newToks = state.tokens.filter(token => token !== null);
-                output.push(...newToks);
-                return state.finished;
-            }, false);
+            try {
+                reducers.reduce((finished, reducer) => {
+                    if (finished) return true;
+                    const state = reducer(char, tokState);
+                    const newToks = state.tokens.filter(token => token !== null);
+                    output.push(...newToks);
+                    return state.finished;
+                }, false);
+            } catch (err) {
+                // If it's a TokenError, create (and the catcher exists)
+                // create a token from it
+                if (err instanceof TokenError && catcher !== null) {
+                    const tok = catcher(err.text)(err.lexeme, err.offset);
+                    tok.message = err.message;
+                    output.push(tok);
+                } else {
+                    // Otherwise just throw the error again
+                    throw err;
+                }
+            }
         }
 
         return output;
@@ -215,6 +230,12 @@ const Tokenizer = function Tokenizer () {
         }
 
         reducers.push(reducer);
+        return T;
+    }
+
+    T.catch = tokenCreator => {
+        catcher = tokenCreator;
+
         return T;
     }
 
