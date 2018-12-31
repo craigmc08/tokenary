@@ -23,7 +23,7 @@ test('stringifyToken should format a single token', () => {
 });
 
 test('prettyPrint should format an array of tokens', () => {
-    const expected = `[\n  <Token type='word' lexeme='dog' offset=7>,\n  <TokenType='word' lexeme='cat' offset=11>\n]`;
+    const expected = `[\n  <Token type='word' lexeme='dog' offset=7>,\n  <Token type='word' lexeme='cat' offset=11>\n]`;
     expect(prettyPrint([
         makeToken('word')('dog', 7), makeToken('word')('cat', 11)
     ])).toBe(expected);
