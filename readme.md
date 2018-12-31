@@ -69,6 +69,9 @@ See [examples](examples) for more.
 <dt><a href="#makeNothing">makeNothing(text)</a> ⇒ <code>function</code></dt>
 <dd><p>Creates a null token (ignored by Tokenizer)</p>
 </dd>
+<dt><a href="#makeError">makeError(message)</a> ⇒ <code>function</code></dt>
+<dd><p>Throws an error</p>
+</dd>
 <dt><a href="#Tokenary">Tokenary(text)</a> ⇒ <code><a href="#Token">Array.&lt;Token&gt;</a></code></dt>
 <dd></dd>
 <dt><a href="#Tokenizer">Tokenizer()</a> ⇒ <code><a href="#Tokenary">Tokenary</a></code></dt>
@@ -80,7 +83,7 @@ See [examples](examples) for more.
 <dt><a href="#if">if(predicate, reducer)</a></dt>
 <dd><p>Adds a reducer that is run if <code>predicate</code> is true for the current char</p>
 </dd>
-<dt><a href="#keywords">keywords(keywordMap)</a> ⇒ <code><a href="#Reducer">Reducer</a></code></dt>
+<dt><a href="#keywords">keywords(keywordMap, [settings])</a> ⇒ <code><a href="#Reducer">Reducer</a></code></dt>
 <dd><p>Adds a reducer that extracts keywords from the keyword map, running the token creator for each.</p>
 </dd>
 <dt><a href="#onChar">onChar(reducerMap)</a> ⇒ <code><a href="#Reducer">Reducer</a></code></dt>
@@ -300,6 +303,17 @@ Creates a null token (ignored by Tokenizer)
 | --- | --- |
 | text | <code>string</code> | 
 
+<a name="makeError"></a>
+
+## makeError(message) ⇒ <code>function</code>
+Throws an error
+
+**Kind**: global function  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| message | <code>string</code> | The message the error has |
+
 <a name="Tokenary"></a>
 
 ## Tokenary(text) ⇒ [<code>Array.&lt;Token&gt;</code>](#Token)
@@ -314,6 +328,7 @@ Creates a null token (ignored by Tokenizer)
 | Name | Type | Description |
 | --- | --- | --- |
 | default | <code>function</code> |  |
+| catch | <code>function</code> |  |
 | if | <code>function</code> |  |
 | keywords | <code>function</code> |  |
 | onChar | <code>function</code> | Parses the text into tokens based on the rules given to it |
@@ -353,14 +368,18 @@ Adds a reducer that is run if `predicate` is true for the current char
 
 <a name="keywords"></a>
 
-## keywords(keywordMap) ⇒ [<code>Reducer</code>](#Reducer)
+## keywords(keywordMap, [settings]) ⇒ [<code>Reducer</code>](#Reducer)
 Adds a reducer that extracts keywords from the keyword map, running the token creator for each.
 
 **Kind**: global function  
 
-| Param | Type |
-| --- | --- |
-| keywordMap | <code>Object.&lt;string, TokenCreator&gt;</code> | 
+| Param | Type | Description |
+| --- | --- | --- |
+| keywordMap | <code>Object.&lt;string, TokenCreator&gt;</code> |  |
+| [settings] | <code>object</code> | keywords parsing settings |
+| [settings.charset] | <code>RegExp</code> | Charset allowed for a keyword |
+| [settings.firstChar] | <code>string</code> \| <code>RegExp</code> | Charset allowed for first character of keyword |
+| [settings.noMatch] | [<code>TokenCreator</code>](#TokenCreator) | Token creator to use on invalid keywords, nothing happens if not supplied |
 
 <a name="onChar"></a>
 
