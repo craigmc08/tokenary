@@ -1,9 +1,11 @@
 const tokState = require('./TokState');
+const reducer = require('./reducer');
+const token = require('./Token');
 
 /**
- * @typedef {import("./reducer").Reducer} Reducer
- * @typedef {import("./Token").Token} Token
- * @typedef {import("./TokState").TokState} TokState
+ * @typedef {reducer.Reducer} Reducer
+ * @typedef {token.Token} Token
+ * @typedef {tokState.TokState} TokState
  */
 
 /**
@@ -11,7 +13,7 @@ const tokState = require('./TokState');
  * @param {Reducer[]} reducers - Main reducers
  * @returns {function(string): Token[]}
  */
-function Tokenary(reducers) {
+function tokenary(reducers) {
     if (!Array.isArray(reducers)) throw new TypeError('`reducers` must be an array');
 
     return function Tokenize(text) {

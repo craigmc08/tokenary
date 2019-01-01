@@ -1,6 +1,10 @@
 const TokenError = require('./TokenError');
 
 /**
+ * @namespace token
+ */
+
+/**
  * @typedef Token
  * @property {string} type - Type of token
  * @property {string} lexeme - The text this token represents
@@ -15,8 +19,8 @@ const TokenError = require('./TokenError');
  */
 
  /**
-  * @memberof Token
   * Creates a token object
+  * @memberof token
   * @param {string} type - Type name of token
   * @returns {TokenCreator}
   */
@@ -24,16 +28,16 @@ const makeToken = type => (lexeme, offset) => ({ type, lexeme, offset });
 exports.makeToken = makeToken;
 
 /**
- * @memberof Token
  * Creates nothing
+ * @memberof token
  * @type {TokenCreator}
  */
 const makeNothing = (lexeme, offset) => null;
 exports.makeNothing = makeNothing;
 
 /**
- * @memberof Token
  * Throws an error
+ * @memberof token
  * @param {string} message
  * @returns {TokenCreator}
  * @throws TokenError
@@ -45,6 +49,7 @@ exports.makeError = makeError;
 
 /**
  * Formats a token for printing
+ * @memberof token
  * @param {Token} token - Token to stringify
  * @returns {string}
  */
@@ -54,6 +59,7 @@ exports.stringifyToken = stringifyToken;
 
 /**
  * Formats an array of tokens for printing
+ * @memberof token
  * @param {Token[]} tokens - Tokens to pretty print
  * @returns {string}
  */

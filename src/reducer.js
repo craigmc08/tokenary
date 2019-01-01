@@ -1,20 +1,22 @@
 const tokState = require('./TokState');
 const predicate = require('./predicate');
 const TokenError = require('./TokenError');
+const token = require('./Token');
 
 /**
  * @namespace reducer
  */
 
 /**
- * @typedef {import("./TokState").TokState} TokState
- * @typedef {import("./predicate").Predicate} Predicate
- * @typedef {import("./Token").Token} Token
- * @typedef {import("./Token").TokenCreator} TokenCreator
+ * @typedef {tokState.TokState} TokState
+ * @typedef {predicate.Predicate} Predicate
+ * @typedef {token.Token} Token
+ * @typedef {token.TokenCreator} TokenCreator
  */
 
 /**
  * @callback Reducer
+ * A function that transforms a TokState. Returns `null` to have no effect.
  * @param {TokState} state - The state to modify
  * @returns {TokState}
  */

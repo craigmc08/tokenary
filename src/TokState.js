@@ -1,5 +1,7 @@
+const token = require('./Token');
+
 /**
- * @typedef {import("./Token").Token} Token
+ * @typedef {token.Token} Token
  */
 
 /**
