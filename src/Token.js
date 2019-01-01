@@ -1,4 +1,9 @@
 const TokenError = require('./TokenError');
+const tokState = require('./TokState');
+
+/**
+ * @typedef {tokState.TokState} TokState
+ */
 
 /**
  * @namespace token
@@ -13,8 +18,9 @@ const TokenError = require('./TokenError');
 
 /**
  * @callback TokenCreator
- * @param {string} lexeme
- * @param {number} offset
+ * @param {string} lexeme - The text this token represents
+ * @param {number} offset - The offset of the first character of the lexeme
+ * @param {TokState} [state] - State of tokenizer when created (optional)
  * @returns {Token|undefined}
  */
 
@@ -42,8 +48,8 @@ exports.makeNothing = makeNothing;
  * @returns {TokenCreator}
  * @throws TokenError
  */
-const makeError = message => (lexeme, offset) => {
-    throw new TokenError(message, lexeme, offset);
+const makeError = message => (lexeme, offset, state) => {
+    throw new TokenError(message, lexeme, offset, state);
 }
 exports.makeError = makeError;
 

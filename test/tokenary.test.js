@@ -1,7 +1,7 @@
 const {
     tokenary,
     reducer: { ifChar, everythingUntil, consume, single },
-    token: { makeToken },
+    token: { makeToken, makeError },
     tokState
 } = require('../src');
 
@@ -35,6 +35,18 @@ test('tokenary should use the state from the first reducer to return non-null', 
         state => tokState.addToken(tokState.advance(state), makeToken('a')('a', 0)),
         state => tokState.addToken(tokState.advance(state), makeToken('b')('b', 0))
     ])('a')).toEqual([ makeToken('a')('a', 0) ]);
+});
+
+test('tokenary should be able to catch errors', () => {
+    expect(tokenary([
+        ifChar({
+            ',': single(makeError('Commas not allowed'))
+        })
+    ], {
+        catcher: makeToken('error')
+    })('a,b')).toEqual([
+        Object.assign({}, makeToken('error')(',', 1), { message: 'Commas not allowed' })
+    ]);
 });
 
 test('example csv parser should work', () => {

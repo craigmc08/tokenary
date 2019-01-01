@@ -59,10 +59,10 @@ const keywords = (keywordMap, settings) => {
 
         if (keywords.includes(word)) {
             // If it is a keyword, add the appropriate token
-            return tokState.addToken(finalState, keywordMap[word](word, start));
+            return tokState.addToken(finalState, keywordMap[word](word, start, finalState));
         } else if (noMatch !== null) {
             // If it's not, check for a no match
-            return tokState.addToken(finalState, noMatch(word, start));
+            return tokState.addToken(finalState, noMatch(word, start, finalState));
         } else {
             return null;
         }
@@ -107,7 +107,8 @@ exports.ifChar = ifChar;
 const single = tokenCreator => state => {
     const char = tokState.peek(state);
     const start = state.current;
-    return tokState.addToken(tokState.advance(state), tokenCreator(char, start));
+    const finalState = tokState.advance(state);
+    return tokState.addToken(finalState, tokenCreator(char, start, finalState));
 }
 exports.single = single;
 
@@ -127,7 +128,8 @@ const consume = reducer => tokenCreator => state => {
         return null;
     }
     // Add the token
-    return tokState.addToken(finalState, tokenCreator(tokState.segmentFrom(finalState, start), start))
+    const newToken = tokenCreator(tokState.segmentFrom(finalState, start), start, finalState)
+    return tokState.addToken(finalState, newToken);
 }
 exports.consume = consume;
 
@@ -197,7 +199,8 @@ const char = char => state => {
     if (tokState.peek(state) === char) return tokState.advance(state);
     else throw new TokenError(
         `Expected '${char}' but got ${tokState.peek(state)}`,
-        tokState.peek(state), state.current
+        tokState.peek(state), state.current,
+        tokState.advance(state)
     );
 }
 exports.char = char;
