@@ -39,4 +39,4 @@ function tokenary(reducers) {
         return state.tokens;
     }
 }
-module.exports = Tokenary;
+module.exports = tokenary;
