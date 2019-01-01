@@ -34,7 +34,7 @@ test('tokenary should use the state from the first reducer to return non-null', 
     expect(tokenary([
         state => tokState.addToken(tokState.advance(state), makeToken('a')('a', 0)),
         state => tokState.addToken(tokState.advance(state), makeToken('b')('b', 0))
-    ])('a')).toEqual(tokState.create('a', 1, [ makeToken('a')('a', 0) ]));
+    ])('a')).toEqual([ makeToken('a')('a', 0) ]);
 });
 
 test('example csv parser should work', () => {
