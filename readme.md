@@ -72,7 +72,7 @@ See [examples](examples) for more.
 ## Functions
 
 <dl>
-<dt><a href="#tokenary">tokenary(reducers)</a> ⇒ <code>function</code></dt>
+<dt><a href="#tokenary">tokenary(reducers, [settings])</a> ⇒ <code>function</code></dt>
 <dd><p>Creates a tokenizing function</p>
 </dd>
 </dl>
@@ -86,6 +86,8 @@ See [examples](examples) for more.
 <dd></dd>
 <dt><a href="#Reducer">Reducer</a> ⇒ <code><a href="#TokState">TokState</a></code></dt>
 <dd></dd>
+<dt><a href="#TokState">TokState</a> : <code>tokState.TokState</code></dt>
+<dd></dd>
 <dt><a href="#Token">Token</a></dt>
 <dd></dd>
 <dt><a href="#TokenCreator">TokenCreator</a> ⇒ <code><a href="#Token">Token</a></code> | <code>undefined</code></dt>
@@ -93,6 +95,8 @@ See [examples](examples) for more.
 <dt><a href="#Token">Token</a> : <code>token.Token</code></dt>
 <dd></dd>
 <dt><a href="#TokState">TokState</a></dt>
+<dd></dd>
+<dt><a href="#TokState">TokState</a> : <code>tokState.TokState</code></dt>
 <dd></dd>
 </dl>
 
@@ -102,13 +106,14 @@ See [examples](examples) for more.
 **Kind**: global class  
 <a name="new_TokenError_new"></a>
 
-### new TokenError(message, lexeme, offset)
+### new TokenError(message, lexeme, offset, state)
 
 | Param | Type | Description |
 | --- | --- | --- |
 | message | <code>string</code> | The error message |
 | lexeme | <code>string</code> | The lexeme this error is for |
 | offset | <code>number</code> | The index of the first lexeme character in the text |
+| state | [<code>TokState</code>](#TokState) | The state of the tokenizer when error was created |
 
 <a name="predicate"></a>
 
@@ -439,7 +444,7 @@ Formats an array of tokens for printing
 
 <a name="tokenary"></a>
 
-## tokenary(reducers) ⇒ <code>function</code>
+## tokenary(reducers, [settings]) ⇒ <code>function</code>
 Creates a tokenizing function
 
 **Kind**: global function  
@@ -447,6 +452,8 @@ Creates a tokenizing function
 | Param | Type | Description |
 | --- | --- | --- |
 | reducers | [<code>Array.&lt;Reducer&gt;</code>](#Reducer) | Main reducers |
+| [settings] | <code>object</code> | Settings for tokenizer |
+| [settings.catcher] | [<code>TokenCreator</code>](#TokenCreator) | Token creator to use if an error is found |
 
 <a name="TokState"></a>
 
@@ -494,6 +501,39 @@ Increments TokState.current by 1 (creates new object)
 | --- | --- | --- |
 | state | [<code>TokState</code>](#TokState) | The state to modify |
 
+<a name="TokState"></a>
+
+## TokState : <code>tokState.TokState</code>
+**Kind**: global typedef  
+
+* [TokState](#TokState) : <code>tokState.TokState</code>
+    * [.create(text, [current], [tokens])](#TokState.create) ⇒ [<code>TokState</code>](#TokState)
+    * [.advance(state)](#TokState.advance) ⇒ [<code>TokState</code>](#TokState)
+
+<a name="TokState.create"></a>
+
+### TokState.create(text, [current], [tokens]) ⇒ [<code>TokState</code>](#TokState)
+Creates a TokState object
+
+**Kind**: static method of [<code>TokState</code>](#TokState)  
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| text | <code>string</code> |  | The text represented by the state |
+| [current] | <code>number</code> | <code>0</code> | Current offset in text |
+| [tokens] | [<code>Array.&lt;Token&gt;</code>](#Token) |  | Tokens created so far |
+
+<a name="TokState.advance"></a>
+
+### TokState.advance(state) ⇒ [<code>TokState</code>](#TokState)
+Increments TokState.current by 1 (creates new object)
+
+**Kind**: static method of [<code>TokState</code>](#TokState)  
+
+| Param | Type |
+| --- | --- |
+| state | [<code>TokState</code>](#TokState) | 
+
 <a name="Token"></a>
 
 ## Token
@@ -511,10 +551,11 @@ Increments TokState.current by 1 (creates new object)
 ## TokenCreator ⇒ [<code>Token</code>](#Token) \| <code>undefined</code>
 **Kind**: global typedef  
 
-| Param | Type |
-| --- | --- |
-| lexeme | <code>string</code> | 
-| offset | <code>number</code> | 
+| Param | Type | Description |
+| --- | --- | --- |
+| lexeme | <code>string</code> | The text this token represents |
+| offset | <code>number</code> | The offset of the first character of the lexeme |
+| [state] | [<code>TokState</code>](#TokState) | State of tokenizer when created (optional) |
 
 <a name="Token"></a>
 
@@ -534,6 +575,39 @@ Increments TokState.current by 1 (creates new object)
 
 
 * [TokState](#TokState)
+    * [.create(text, [current], [tokens])](#TokState.create) ⇒ [<code>TokState</code>](#TokState)
+    * [.advance(state)](#TokState.advance) ⇒ [<code>TokState</code>](#TokState)
+
+<a name="TokState.create"></a>
+
+### TokState.create(text, [current], [tokens]) ⇒ [<code>TokState</code>](#TokState)
+Creates a TokState object
+
+**Kind**: static method of [<code>TokState</code>](#TokState)  
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| text | <code>string</code> |  | The text represented by the state |
+| [current] | <code>number</code> | <code>0</code> | Current offset in text |
+| [tokens] | [<code>Array.&lt;Token&gt;</code>](#Token) |  | Tokens created so far |
+
+<a name="TokState.advance"></a>
+
+### TokState.advance(state) ⇒ [<code>TokState</code>](#TokState)
+Increments TokState.current by 1 (creates new object)
+
+**Kind**: static method of [<code>TokState</code>](#TokState)  
+
+| Param | Type |
+| --- | --- |
+| state | [<code>TokState</code>](#TokState) | 
+
+<a name="TokState"></a>
+
+## TokState : <code>tokState.TokState</code>
+**Kind**: global typedef  
+
+* [TokState](#TokState) : <code>tokState.TokState</code>
     * [.create(text, [current], [tokens])](#TokState.create) ⇒ [<code>TokState</code>](#TokState)
     * [.advance(state)](#TokState.advance) ⇒ [<code>TokState</code>](#TokState)
 
