@@ -20,7 +20,7 @@ describe('char', () => {
 describe('untilRegexFails', () => {
     const R = untilRegexFails(/^[^"]*$/);
     test('untilRegexFails should work correctly', () => {
-        expect(R(create('hello'))).toEqual(create('hello', 6, []));
+        expect(R(create('hello'))).toEqual(create('hello', 5, []));
         expect(R(create('hel"lo'))).toEqual(create('hel"lo', 3, []));
     });
 
@@ -60,8 +60,8 @@ describe('sequence', () => {
 test('everything advance past every character', () => {
     const R = everything;
     const text = 'abcdefghi';
-    expect(R(create(text))).toEqual(create(text, 10, []));
-    expect(R(create(text, 3))).toEqual(create(text, 10, []));
+    expect(R(create(text))).toEqual(create(text, 9, []));
+    expect(R(create(text, 3))).toEqual(create(text, 9, []));
 });
 
 describe('everythingUntil', () => {
@@ -103,7 +103,7 @@ describe('consume', () => {
         expect(R(create(text))).toEqual(create(text, 5, [
             makeToken('word')('word1', 0)
         ]));
-        expect(R(create(text, 6))).toEqual(create(text, 12, [
+        expect(R(create(text, 6))).toEqual(create(text, 11, [
             makeToken('word')('word2', 6)
         ]));
     });

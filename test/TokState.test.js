@@ -52,14 +52,14 @@ describe('addToken', () => {
 
 describe('atEnd', () => {
     test('atEnd should return true when at the end', () => {
-        expect(atEnd(create('hello', 6))).toBe(true);
+        expect(atEnd(create('hello', 5))).toBe(true);
         expect(atEnd(create('hello', 7))).toBe(true);
-        expect(atEnd(create('good bye', 9))).toBe(true);
+        expect(atEnd(create('good bye', 8))).toBe(true);
     });
 
     test('atEnd should return false when not at end', () => {
         expect(atEnd(create('hello', 3))).toBe(false);
-        expect(atEnd(create('hello', 5))).toBe(false);
+        expect(atEnd(create('hello', 4))).toBe(false);
         expect(atEnd(create('good bye', 4))).toBe(false);
     });
 });

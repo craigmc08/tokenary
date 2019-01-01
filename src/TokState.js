@@ -58,7 +58,7 @@ exports.addToken = addToken;
  * @returns {boolean}
  */
 function atEnd(state) {
-    return state.current > state.text.length;
+    return state.current >= state.text.length;
 }
 exports.atEnd = atEnd;
 
