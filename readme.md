@@ -3,7 +3,10 @@ Build tokenizers for javascript
 
 ### Basic Usage (CSV tokenizer)
 ```js
-const { Tokenizer, char, makeToken, single, everythingUntil, prettyPrint } = require('tokenary');
+const {
+    tokenary,
+    reducer: { ifChar, single, makeToken, everythingUntil }
+} = require('tokenary');
 
 const TokenType = {
     comma: 'COMMA',
@@ -11,15 +14,13 @@ const TokenType = {
     newline: 'NEWLINE',
 };
 
-const tokenizeCSV = Tokenizer()
-    .onChar({
+const tokenizeCSV = tokenary([
+    ifChar({
         ',': single(makeToken(TokenType.comma)),
-        '\n': single(makeToken(TokenType.newline)),
-    })
-    .default(
-        everythingUntil(',', '\n')(makeToken(TokenType.value))
-    ),
-;
+        '\n': single(makeToken(TokenType.newline))
+    }),
+    everythingUntil(',', '\n')(makeToken(TokenType.value))
+]);
 
 const testCSV = 
 `1,Up
