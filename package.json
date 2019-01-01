@@ -1,6 +1,6 @@
 {
   "name": "tokenary",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "Library for building tokenizers",
   "main": "src/index.js",
   "repository": "https://github.com/craigmc08/tokenary",
