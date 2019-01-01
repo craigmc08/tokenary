@@ -4,8 +4,8 @@
  */
 
 /**
- * @callback Predicate
  * @memberof predicate
+ * @callback Predicate
  * @param {any} actual
  * @returns {boolean}
  */

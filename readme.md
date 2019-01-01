@@ -3,7 +3,10 @@ Build tokenizers for javascript
 
 ### Basic Usage (CSV tokenizer)
 ```js
-const { Tokenizer, char, makeToken, single, everythingUntil, prettyPrint } = require('tokenary');
+const {
+    tokenary,
+    reducer: { ifChar, single, makeToken, everythingUntil }
+} = require('tokenary');
 
 const TokenType = {
     comma: 'COMMA',
@@ -11,15 +14,13 @@ const TokenType = {
     newline: 'NEWLINE',
 };
 
-const tokenizeCSV = Tokenizer()
-    .onChar({
+const tokenizeCSV = tokenary([
+    ifChar({
         ',': single(makeToken(TokenType.comma)),
-        '\n': single(makeToken(TokenType.newline)),
-    })
-    .default(
-        everythingUntil(',', '\n')(makeToken(TokenType.value))
-    ),
-;
+        '\n': single(makeToken(TokenType.newline))
+    }),
+    consume(everythingUntil(',', '\n'))(makeToken(TokenType.value))
+]);
 
 const testCSV = 
 `1,Up
@@ -49,98 +50,65 @@ See [examples](examples) for more.
 
 # API
 
+## Classes
+
+<dl>
+<dt><a href="#TokenError">TokenError</a></dt>
+<dd></dd>
+</dl>
+
 ## Objects
 
 <dl>
 <dt><a href="#predicate">predicate</a> : <code>object</code></dt>
 <dd><p>Functions that return true or false.</p>
 </dd>
+<dt><a href="#reducer">reducer</a> : <code>object</code></dt>
+<dd></dd>
+<dt><a href="#token">token</a> : <code>object</code></dt>
+<dd></dd>
 </dl>
 
 ## Functions
 
 <dl>
-<dt><a href="#CreateToken">CreateToken(text)</a> ⇒ <code>function</code></dt>
-<dd><p>Creates a token object</p>
-</dd>
-<dt><a href="#makeToken">makeToken(type)</a> ⇒ <code>function</code></dt>
-<dd><p>Creates a token object</p>
-</dd>
-<dt><a href="#makeNothing">makeNothing(text)</a> ⇒ <code>function</code></dt>
-<dd><p>Creates a null token (ignored by Tokenizer)</p>
-</dd>
-<dt><a href="#makeError">makeError(message)</a> ⇒ <code>function</code></dt>
-<dd><p>Throws an error</p>
-</dd>
-<dt><a href="#Tokenary">Tokenary(text)</a> ⇒ <code><a href="#Token">Array.&lt;Token&gt;</a></code></dt>
-<dd></dd>
-<dt><a href="#Tokenizer">Tokenizer()</a> ⇒ <code><a href="#Tokenary">Tokenary</a></code></dt>
-<dd><p>Creates a Tokenizer object</p>
-</dd>
-<dt><a href="#default">default(reducer)</a></dt>
-<dd><p>Adds a reducer that is run whenever it is reached</p>
-</dd>
-<dt><a href="#if">if(predicate, reducer)</a></dt>
-<dd><p>Adds a reducer that is run if <code>predicate</code> is true for the current char</p>
-</dd>
-<dt><a href="#keywords">keywords(keywordMap, [settings])</a> ⇒ <code><a href="#Reducer">Reducer</a></code></dt>
-<dd><p>Adds a reducer that extracts keywords from the keyword map, running the token creator for each.</p>
-</dd>
-<dt><a href="#onChar">onChar(reducerMap)</a> ⇒ <code><a href="#Reducer">Reducer</a></code></dt>
-<dd><p>Calls the reducer if the character matches a reducer in the supplied map</p>
-</dd>
-<dt><a href="#everything">everything(tokenCreator)</a> ⇒ <code><a href="#Reducer">Reducer</a></code></dt>
-<dd><p>Creates a token for every character after the reducer is run</p>
-</dd>
-<dt><a href="#everythingUntil">everythingUntil(...chars)</a> ⇒ <code>function</code></dt>
-<dd><p>Creates a token for every character until a character matches one given</p>
-</dd>
-<dt><a href="#single">single(tokenCreator)</a> ⇒ <code><a href="#Reducer">Reducer</a></code></dt>
-<dd><p>Creates a token from the single current character</p>
-</dd>
-<dt><a href="#sequence">sequence(...consumers)</a> ⇒ <code>function</code></dt>
-<dd><p>Runs all the consumers given and creates a token from what they consume</p>
-</dd>
-<dt><a href="#consume">consume(consumer)</a></dt>
-<dd><p>Runs a consumer and creates a token from what it consumes</p>
-</dd>
-<dt><a href="#char">char(char)</a> ⇒ <code>Consumer</code></dt>
-<dd><p>Consumes a single specified character</p>
-</dd>
-<dt><a href="#regex">regex(regex)</a> ⇒ <code>Consumer</code></dt>
-<dd><p>Consumes a single character that matches the supplied regex</p>
-</dd>
-<dt><a href="#untilRegexFails">untilRegexFails(regex)</a> ⇒ <code>Consumer</code></dt>
-<dd><p>Runs the regex on increasing chunks of text until the regex fails</p>
-</dd>
-<dt><a href="#whitespace">whitespace()</a> ⇒ <code>Consumer</code></dt>
-<dd><p>Consumes characters until non-whitespace character is found</p>
-</dd>
-<dt><a href="#str">str(string)</a> ⇒ <code>Consumer</code></dt>
-<dd><p>Consumes and checks for a string</p>
-</dd>
-<dt><a href="#stringifyToken">stringifyToken(token)</a></dt>
-<dd><p>Formats a single token</p>
-</dd>
-<dt><a href="#prettyPrint">prettyPrint(tokens)</a></dt>
-<dd><p>Formats an array of tokens</p>
+<dt><a href="#tokenary">tokenary(reducers)</a> ⇒ <code>function</code></dt>
+<dd><p>Creates a tokenizing function</p>
 </dd>
 </dl>
 
 ## Typedefs
 
 <dl>
+<dt><a href="#TokState">TokState</a> : <code>reducer.Reducer</code></dt>
+<dd></dd>
+<dt><a href="#TokenCreator">TokenCreator</a> : <code>tokState.TokState</code></dt>
+<dd></dd>
+<dt><a href="#Reducer">Reducer</a> ⇒ <code><a href="#TokState">TokState</a></code></dt>
+<dd></dd>
 <dt><a href="#Token">Token</a></dt>
+<dd></dd>
+<dt><a href="#TokenCreator">TokenCreator</a> ⇒ <code><a href="#Token">Token</a></code> | <code>undefined</code></dt>
+<dd></dd>
+<dt><a href="#Token">Token</a> : <code>token.Token</code></dt>
 <dd></dd>
 <dt><a href="#TokState">TokState</a></dt>
 <dd></dd>
-<dt><a href="#ReducerState">ReducerState</a></dt>
-<dd></dd>
-<dt><a href="#Reducer">Reducer</a> ⇒ <code><a href="#ReducerState">ReducerState</a></code></dt>
-<dd></dd>
-<dt><a href="#TokenCreator">TokenCreator</a> ⇒ <code>function</code></dt>
-<dd></dd>
 </dl>
+
+<a name="TokenError"></a>
+
+## TokenError
+**Kind**: global class  
+<a name="new_TokenError_new"></a>
+
+### new TokenError(message, lexeme, offset)
+
+| Param | Type | Description |
+| --- | --- | --- |
+| message | <code>string</code> | The error message |
+| lexeme | <code>string</code> | The lexeme this error is for |
+| offset | <code>number</code> | The index of the first lexeme character in the text |
 
 <a name="predicate"></a>
 
@@ -270,254 +238,261 @@ Logical xor operator on 2 predicates
 | --- | --- |
 | actual | <code>any</code> | 
 
-<a name="CreateToken"></a>
+<a name="reducer"></a>
 
-## CreateToken(text) ⇒ <code>function</code>
-Creates a token object
+## reducer : <code>object</code>
+**Kind**: global namespace  
 
-**Kind**: global function  
+* [reducer](#reducer) : <code>object</code>
+    * [.keywords(keywordMap, [settings])](#reducer.keywords) ⇒ [<code>Reducer</code>](#Reducer)
+    * [.ifThen(predicate)](#reducer.ifThen) ⇒ <code>function</code>
+    * [.ifChar(reducerMap)](#reducer.ifChar) ⇒ [<code>Reducer</code>](#Reducer)
+    * [.single(tokenCreator)](#reducer.single) ⇒ [<code>Reducer</code>](#Reducer)
+    * [.consume(reducer)](#reducer.consume) ⇒ <code>function</code>
+    * [.sequence(reducers)](#reducer.sequence) ⇒ [<code>Reducer</code>](#Reducer)
+    * [.everything()](#reducer.everything) ⇒ [<code>Reducer</code>](#Reducer)
+    * [.everythingUntil(chars)](#reducer.everythingUntil) ⇒ [<code>Reducer</code>](#Reducer)
+    * [.char(char)](#reducer.char) ⇒ [<code>Reducer</code>](#Reducer)
+    * [.untilRegexFails(regex)](#reducer.untilRegexFails) ⇒ [<code>Reducer</code>](#Reducer)
+    * [.whitespace()](#reducer.whitespace) ⇒ [<code>Reducer</code>](#Reducer)
+
+<a name="reducer.keywords"></a>
+
+### reducer.keywords(keywordMap, [settings]) ⇒ [<code>Reducer</code>](#Reducer)
+Extracts keywords from the text
+
+**Kind**: static method of [<code>reducer</code>](#reducer)  
 
 | Param | Type | Description |
 | --- | --- | --- |
-| text | <code>string</code> | Full text token belongs to |
+| keywordMap | <code>Object.&lt;string, TokenCreator&gt;</code> | Map of keywords to check for |
+| [settings] | <code>object</code> |  |
+| [settings.charset] | <code>RegExp</code> | Charset allowed for a keyword |
+| [settings.firstChar] | <code>RegExp</code> | Charset allowed for first character of keyword |
+| [settings.noMatch] | [<code>TokenCreator</code>](#TokenCreator) | Token creator to use on invalid keywords |
 
-<a name="makeToken"></a>
+<a name="reducer.ifThen"></a>
 
-## makeToken(type) ⇒ <code>function</code>
-Creates a token object
+### reducer.ifThen(predicate) ⇒ <code>function</code>
+If the predicate is true, run the reducer
 
-**Kind**: global function  
+**Kind**: static method of [<code>reducer</code>](#reducer)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| predicate | <code>Predicate</code> | Condition to be met |
+
+<a name="reducer.ifChar"></a>
+
+### reducer.ifChar(reducerMap) ⇒ [<code>Reducer</code>](#Reducer)
+If a matching character is found, runs the given reducer
+
+**Kind**: static method of [<code>reducer</code>](#reducer)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| reducerMap | <code>Object.&lt;string, Reducer&gt;</code> | character to reducer map to check |
+
+<a name="reducer.single"></a>
+
+### reducer.single(tokenCreator) ⇒ [<code>Reducer</code>](#Reducer)
+Creates a token from the single current character
+
+**Kind**: static method of [<code>reducer</code>](#reducer)  
 
 | Param | Type |
 | --- | --- |
-| type | <code>string</code> | 
+| tokenCreator | [<code>TokenCreator</code>](#TokenCreator) | 
 
-<a name="makeNothing"></a>
+<a name="reducer.consume"></a>
 
-## makeNothing(text) ⇒ <code>function</code>
-Creates a null token (ignored by Tokenizer)
+### reducer.consume(reducer) ⇒ <code>function</code>
+Creates a token from the characters passed over in the given reducerExpects the given reducers to not return any tokens
 
-**Kind**: global function  
-
-| Param | Type |
-| --- | --- |
-| text | <code>string</code> | 
-
-<a name="makeError"></a>
-
-## makeError(message) ⇒ <code>function</code>
-Throws an error
-
-**Kind**: global function  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| message | <code>string</code> | The message the error has |
-
-<a name="Tokenary"></a>
-
-## Tokenary(text) ⇒ [<code>Array.&lt;Token&gt;</code>](#Token)
-**Kind**: global function  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| text | <code>string</code> | The text to tokenize |
-
-**Properties**
-
-| Name | Type | Description |
-| --- | --- | --- |
-| default | <code>function</code> |  |
-| catch | <code>function</code> |  |
-| if | <code>function</code> |  |
-| keywords | <code>function</code> |  |
-| onChar | <code>function</code> | Parses the text into tokens based on the rules given to it |
-
-<a name="Tokenizer"></a>
-
-## Tokenizer() ⇒ [<code>Tokenary</code>](#Tokenary)
-Creates a Tokenizer object
-
-**Kind**: global function  
-<a name="Tokenizer..reducers"></a>
-
-### Tokenizer~reducers : [<code>Array.&lt;Reducer&gt;</code>](#Reducer)
-**Kind**: inner constant of [<code>Tokenizer</code>](#Tokenizer)  
-<a name="default"></a>
-
-## default(reducer)
-Adds a reducer that is run whenever it is reached
-
-**Kind**: global function  
+**Kind**: static method of [<code>reducer</code>](#reducer)  
 
 | Param | Type |
 | --- | --- |
 | reducer | [<code>Reducer</code>](#Reducer) | 
 
-<a name="if"></a>
+<a name="reducer.sequence"></a>
 
-## if(predicate, reducer)
-Adds a reducer that is run if `predicate` is true for the current char
+### reducer.sequence(reducers) ⇒ [<code>Reducer</code>](#Reducer)
+Pipe output of a sequence of reducers together (left to right)
 
-**Kind**: global function  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| predicate | <code>Predicate</code> |  |
-| reducer | [<code>Reducer</code>](#Reducer) | Reducer to run if `predicate` is true |
-
-<a name="keywords"></a>
-
-## keywords(keywordMap, [settings]) ⇒ [<code>Reducer</code>](#Reducer)
-Adds a reducer that extracts keywords from the keyword map, running the token creator for each.
-
-**Kind**: global function  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| keywordMap | <code>Object.&lt;string, TokenCreator&gt;</code> |  |
-| [settings] | <code>object</code> | keywords parsing settings |
-| [settings.charset] | <code>RegExp</code> | Charset allowed for a keyword |
-| [settings.firstChar] | <code>string</code> \| <code>RegExp</code> | Charset allowed for first character of keyword |
-| [settings.noMatch] | [<code>TokenCreator</code>](#TokenCreator) | Token creator to use on invalid keywords, nothing happens if not supplied |
-
-<a name="onChar"></a>
-
-## onChar(reducerMap) ⇒ [<code>Reducer</code>](#Reducer)
-Calls the reducer if the character matches a reducer in the supplied map
-
-**Kind**: global function  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| reducerMap | <code>Object.&lt;string, Reducer&gt;</code> | character:reducer map to check |
-
-<a name="everything"></a>
-
-## everything(tokenCreator) ⇒ [<code>Reducer</code>](#Reducer)
-Creates a token for every character after the reducer is run
-
-**Kind**: global function  
+**Kind**: static method of [<code>reducer</code>](#reducer)  
 
 | Param | Type |
 | --- | --- |
-| tokenCreator | [<code>TokenCreator</code>](#TokenCreator) | 
+| reducers | [<code>Array.&lt;Reducer&gt;</code>](#Reducer) | 
 
-<a name="everythingUntil"></a>
+<a name="reducer.everything"></a>
 
-## everythingUntil(...chars) ⇒ <code>function</code>
-Creates a token for every character until a character matches one given
+### reducer.everything() ⇒ [<code>Reducer</code>](#Reducer)
+Creates a token from every character that follows
 
-**Kind**: global function  
+**Kind**: static method of [<code>reducer</code>](#reducer)  
+<a name="reducer.everythingUntil"></a>
 
-| Param | Type | Description |
-| --- | --- | --- |
-| ...chars | <code>string</code> | Characters to possibly match |
+### reducer.everythingUntil(chars) ⇒ [<code>Reducer</code>](#Reducer)
+Creates a token from every character that follows until one given is reached
 
-<a name="single"></a>
-
-## single(tokenCreator) ⇒ [<code>Reducer</code>](#Reducer)
-Creates a token from the single current character
-
-**Kind**: global function  
-
-| Param | Type |
-| --- | --- |
-| tokenCreator | [<code>TokenCreator</code>](#TokenCreator) | 
-
-<a name="sequence"></a>
-
-## sequence(...consumers) ⇒ <code>function</code>
-Runs all the consumers given and creates a token from what they consume
-
-**Kind**: global function  
-
-| Param | Type |
-| --- | --- |
-| ...consumers | <code>Consumer</code> | 
-
-<a name="consume"></a>
-
-## consume(consumer)
-Runs a consumer and creates a token from what it consumes
-
-**Kind**: global function  
-
-| Param | Type |
-| --- | --- |
-| consumer | <code>Consumer</code> | 
-
-<a name="char"></a>
-
-## char(char) ⇒ <code>Consumer</code>
-Consumes a single specified character
-
-**Kind**: global function  
+**Kind**: static method of [<code>reducer</code>](#reducer)  
 
 | Param | Type | Description |
 | --- | --- | --- |
-| char | <code>string</code> | Character to match |
+| chars | <code>Array.&lt;string&gt;</code> | Characters to possibly match |
 
-<a name="regex"></a>
+<a name="reducer.char"></a>
 
-## regex(regex) ⇒ <code>Consumer</code>
-Consumes a single character that matches the supplied regex
+### reducer.char(char) ⇒ [<code>Reducer</code>](#Reducer)
+Advances past a single character, throws an error if it's not what is expected
 
-**Kind**: global function  
+**Kind**: static method of [<code>reducer</code>](#reducer)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| char | <code>string</code> | Expected character |
+
+<a name="reducer.untilRegexFails"></a>
+
+### reducer.untilRegexFails(regex) ⇒ [<code>Reducer</code>](#Reducer)
+Runs the regex until the regex fails on all characters advanced past
+
+**Kind**: static method of [<code>reducer</code>](#reducer)  
 
 | Param | Type |
 | --- | --- |
 | regex | <code>RegExp</code> | 
 
-<a name="untilRegexFails"></a>
+<a name="reducer.whitespace"></a>
 
-## untilRegexFails(regex) ⇒ <code>Consumer</code>
-Runs the regex on increasing chunks of text until the regex fails
+### reducer.whitespace() ⇒ [<code>Reducer</code>](#Reducer)
+Advances past all contiguous whitespace characters
+
+**Kind**: static method of [<code>reducer</code>](#reducer)  
+<a name="token"></a>
+
+## token : <code>object</code>
+**Kind**: global namespace  
+
+* [token](#token) : <code>object</code>
+    * [.makeToken(type)](#token.makeToken) ⇒ [<code>TokenCreator</code>](#TokenCreator)
+    * [.makeNothing()](#token.makeNothing) : [<code>TokenCreator</code>](#TokenCreator)
+    * [.makeError(message)](#token.makeError) ⇒ [<code>TokenCreator</code>](#TokenCreator)
+    * [.stringifyToken(token)](#token.stringifyToken) ⇒ <code>string</code>
+    * [.prettyPrint(tokens)](#token.prettyPrint) ⇒ <code>string</code>
+
+<a name="token.makeToken"></a>
+
+### token.makeToken(type) ⇒ [<code>TokenCreator</code>](#TokenCreator)
+Creates a token object
+
+**Kind**: static method of [<code>token</code>](#token)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| type | <code>string</code> | Type name of token |
+
+<a name="token.makeNothing"></a>
+
+### token.makeNothing() : [<code>TokenCreator</code>](#TokenCreator)
+Creates nothing
+
+**Kind**: static method of [<code>token</code>](#token)  
+<a name="token.makeError"></a>
+
+### token.makeError(message) ⇒ [<code>TokenCreator</code>](#TokenCreator)
+Throws an error
+
+**Kind**: static method of [<code>token</code>](#token)  
+**Throws**:
+
+- TokenError
+
+
+| Param | Type |
+| --- | --- |
+| message | <code>string</code> | 
+
+<a name="token.stringifyToken"></a>
+
+### token.stringifyToken(token) ⇒ <code>string</code>
+Formats a token for printing
+
+**Kind**: static method of [<code>token</code>](#token)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| token | [<code>Token</code>](#Token) | Token to stringify |
+
+<a name="token.prettyPrint"></a>
+
+### token.prettyPrint(tokens) ⇒ <code>string</code>
+Formats an array of tokens for printing
+
+**Kind**: static method of [<code>token</code>](#token)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| tokens | [<code>Array.&lt;Token&gt;</code>](#Token) | Tokens to pretty print |
+
+<a name="tokenary"></a>
+
+## tokenary(reducers) ⇒ <code>function</code>
+Creates a tokenizing function
 
 **Kind**: global function  
 
 | Param | Type | Description |
 | --- | --- | --- |
-| regex | <code>RegExp</code> | Regex to test piece with |
+| reducers | [<code>Array.&lt;Reducer&gt;</code>](#Reducer) | Main reducers |
 
-<a name="whitespace"></a>
+<a name="TokState"></a>
 
-## whitespace() ⇒ <code>Consumer</code>
-Consumes characters until non-whitespace character is found
+## TokState : <code>reducer.Reducer</code>
+**Kind**: global typedef  
 
-**Kind**: global function  
-<a name="str"></a>
+* [TokState](#TokState) : <code>reducer.Reducer</code>
+    * [.create(text, [current], [tokens])](#TokState.create) ⇒ [<code>TokState</code>](#TokState)
+    * [.advance(state)](#TokState.advance) ⇒ [<code>TokState</code>](#TokState)
 
-## str(string) ⇒ <code>Consumer</code>
-Consumes and checks for a string
+<a name="TokState.create"></a>
 
-**Kind**: global function  
+### TokState.create(text, [current], [tokens]) ⇒ [<code>TokState</code>](#TokState)
+Creates a TokState object
 
-| Param | Type |
-| --- | --- |
-| string | <code>String</code> | 
+**Kind**: static method of [<code>TokState</code>](#TokState)  
 
-<a name="stringifyToken"></a>
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| text | <code>string</code> |  | The text represented by the state |
+| [current] | <code>number</code> | <code>0</code> | Current offset in text |
+| [tokens] | [<code>Array.&lt;Token&gt;</code>](#Token) |  | Tokens created so far |
 
-## stringifyToken(token)
-Formats a single token
+<a name="TokState.advance"></a>
 
-**Kind**: global function  
+### TokState.advance(state) ⇒ [<code>TokState</code>](#TokState)
+Increments TokState.current by 1 (creates new object)
 
-| Param | Type |
-| --- | --- |
-| token | [<code>Token</code>](#Token) | 
-
-<a name="prettyPrint"></a>
-
-## prettyPrint(tokens)
-Formats an array of tokens
-
-**Kind**: global function  
+**Kind**: static method of [<code>TokState</code>](#TokState)  
 
 | Param | Type |
 | --- | --- |
-| tokens | [<code>Array.&lt;Token&gt;</code>](#Token) | 
+| state | [<code>TokState</code>](#TokState) | 
+
+<a name="TokenCreator"></a>
+
+## TokenCreator : <code>tokState.TokState</code>
+**Kind**: global typedef  
+<a name="Reducer"></a>
+
+## Reducer ⇒ [<code>TokState</code>](#TokState)
+**Kind**: global typedef  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| state | [<code>TokState</code>](#TokState) | The state to modify |
 
 <a name="Token"></a>
 
@@ -527,11 +502,24 @@ Formats an array of tokens
 
 | Name | Type | Description |
 | --- | --- | --- |
-| type | <code>string</code> \| <code>Symbol</code> | Type of token |
-| lexeme | <code>string</code> | The text this token encapsulates |
-| offset | <code>number</code> | The index of the first character of this token in the text |
-| text | <code>string</code> | The full text this token belongs to |
+| type | <code>string</code> | Type of token |
+| lexeme | <code>string</code> | The text this token represents |
+| offset | <code>number</code> | The offset of the first character of the lexeme |
 
+<a name="TokenCreator"></a>
+
+## TokenCreator ⇒ [<code>Token</code>](#Token) \| <code>undefined</code>
+**Kind**: global typedef  
+
+| Param | Type |
+| --- | --- |
+| lexeme | <code>string</code> | 
+| offset | <code>number</code> | 
+
+<a name="Token"></a>
+
+## Token : <code>token.Token</code>
+**Kind**: global typedef  
 <a name="TokState"></a>
 
 ## TokState
@@ -540,42 +528,36 @@ Formats an array of tokens
 
 | Name | Type | Description |
 | --- | --- | --- |
-| advance | <code>function</code> | Advance the tokenizer 1 character forward |
-| retreat | <code>function</code> | Moves the tokenizer 1 character back |
-| look | <code>function</code> | Returns current character |
-| peek | <code>function</code> | Returns next character |
-| atEnd | <code>function</code> | Returns if the text is at end |
-| getCurrent | <code>function</code> | Gets current index of text |
-| text | <code>string</code> | The full text thats being tokenize |
+| text | <code>string</code> | The text represented by the state |
+| current | <code>number</code> | Current offset in text |
+| tokens | [<code>Array.&lt;Token&gt;</code>](#Token) | Tokens created so far |
 
-<a name="ReducerState"></a>
 
-## ReducerState
-**Kind**: global typedef  
-**Properties**
+* [TokState](#TokState)
+    * [.create(text, [current], [tokens])](#TokState.create) ⇒ [<code>TokState</code>](#TokState)
+    * [.advance(state)](#TokState.advance) ⇒ [<code>TokState</code>](#TokState)
 
-| Name | Type | Description |
-| --- | --- | --- |
-| finished | <code>boolean</code> | If true, no further reducers are run |
-| tokens | [<code>Array.&lt;Token&gt;</code>](#Token) | Tokens to append to output |
+<a name="TokState.create"></a>
 
-<a name="Reducer"></a>
+### TokState.create(text, [current], [tokens]) ⇒ [<code>TokState</code>](#TokState)
+Creates a TokState object
 
-## Reducer ⇒ [<code>ReducerState</code>](#ReducerState)
-**Kind**: global typedef  
-**Returns**: [<code>ReducerState</code>](#ReducerState) - Information about the reducer after it is finished  
+**Kind**: static method of [<code>TokState</code>](#TokState)  
 
-| Param | Type | Description |
-| --- | --- | --- |
-| char | <code>string</code> | Current character of tokenizer |
-| tokState | [<code>TokState</code>](#TokState) | Functions to use for tokenizing |
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| text | <code>string</code> |  | The text represented by the state |
+| [current] | <code>number</code> | <code>0</code> | Current offset in text |
+| [tokens] | [<code>Array.&lt;Token&gt;</code>](#Token) |  | Tokens created so far |
 
-<a name="TokenCreator"></a>
+<a name="TokState.advance"></a>
 
-## TokenCreator ⇒ <code>function</code>
-**Kind**: global typedef  
+### TokState.advance(state) ⇒ [<code>TokState</code>](#TokState)
+Increments TokState.current by 1 (creates new object)
+
+**Kind**: static method of [<code>TokState</code>](#TokState)  
 
 | Param | Type |
 | --- | --- |
-| text | <code>string</code> | 
+| state | [<code>TokState</code>](#TokState) | 
 
