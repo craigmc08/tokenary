@@ -96,48 +96,6 @@ const ifChar = reducerMap => state => {
 }
 exports.ifChar = ifChar;
 
- /**
-  * Creates a token from every character that follows
-  * @memberof reducer
-  * @param {TokenCreator} tokenCreator 
-  * @returns {Reducer}
-  */
-const everything = tokenCreator => state => {
-    let finalState = state;
-    const start = state.current;
-    // Advance state until the end is reached
-    while (!tokState.atEnd(finalState)) {
-        finalState = tokState.advance(finalState);
-    }
-
-    // Add token
-    return tokState.addToken(finalState, tokenCreator(tokState.segmentFrom(finalState, start), start));
-}
-exports.everything = everything;
-
-/**
- * Creates a token from every character that follows until one given is reached
- * @memberof reducer
- * @param {string[]} chars - Characters to possibly match
- * @returns {function(TokenCreator): Reducer}
- */
-const everythingUntil = chars => tokenCreator => state => {
-    let finalState = state;
-    const start = state.current;
-    // Advance until end or one of the parameters characters is reached
-    while (!tokState.atEnd(finalState) && !chars.includes(tokState.peek(finalState))) {
-        finalState = tokState.advance(finalState);
-    }
-
-    if (finalState.current === state.current) {
-        // No leters were consumed, so don't modify state
-        return null;
-    }
-    // Add token
-    return tokState.addToken(finalState, tokenCreator(tokState.segmentFrom(finalState, start), start));
-}
-exports.everythingUntil = everythingUntil;
-
 /**
  * Creates a token from the single current character
  * @memberof reducer
@@ -189,6 +147,45 @@ const sequence = reducers => state => {
 exports.sequence = sequence;
 
 /**
+  * Creates a token from every character that follows
+  * @memberof reducer
+  * @function
+  * @type {Reducer}
+  */
+ const everything = state => {
+    let finalState = state;
+    const start = state.current;
+    // Advance state until the end is reached
+    while (!tokState.atEnd(finalState)) {
+        finalState = tokState.advance(finalState);
+    }
+    return finalState;
+}
+exports.everything = everything;
+
+/**
+ * Creates a token from every character that follows until one given is reached
+ * @memberof reducer
+ * @param {string[]} chars - Characters to possibly match
+ * @returns {Reducer}
+ */
+const everythingUntil = chars => state => {
+    let finalState = state;
+    const start = state.current;
+    // Advance until end or one of the parameters characters is reached
+    while (!tokState.atEnd(finalState) && !chars.includes(tokState.peek(finalState))) {
+        finalState = tokState.advance(finalState);
+    }
+
+    if (finalState.current === state.current) {
+        // No leters were consumed, so don't modify state
+        return null;
+    }
+    return finalState;
+}
+exports.everythingUntil = everythingUntil;
+
+/**
  * Advances past a single character, throws an error if it's not what is expected
  * @memberof reducer
  * @param {string} char - Expected character
@@ -215,6 +212,10 @@ const untilRegexFails = regex => state => {
     const next = () => tokState.segment(finalState, start, finalState.current + 1);
     while (regex.test(next()) && !tokState.atEnd(finalState)) {
         finalState = tokState.advance(finalState);
+    }
+    if (finalState.current === state.current) {
+        // No characters were consumed so return null
+        return null;
     }
     return finalState;
 }

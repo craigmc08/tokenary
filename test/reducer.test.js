@@ -23,6 +23,10 @@ describe('untilRegexFails', () => {
         expect(R(create('hello'))).toEqual(create('hello', 6, []));
         expect(R(create('hel"lo'))).toEqual(create('hel"lo', 3, []));
     });
+
+    test('untilRegexFails should return null when 0 characters are advanced', () => {
+        expect(R(create('hel"lo', 3))).toBe(null);
+    });
 });
 
 test('whitespace should work', () => {
@@ -53,28 +57,28 @@ describe('sequence', () => {
     });
 });
 
-test('everything should make a token from everything', () => {
-    const R = everything(makeToken('e'));
+test('everything advance past every character', () => {
+    const R = everything;
     const text = 'abcdefghi';
-    expect(R(create(text))).toEqual(create(text, 10, [ makeToken('e')('abcdefghi', 0) ]));
-    expect(R(create(text, 3))).toEqual(create(text, 10, [ makeToken('e')('defghi', 3) ]));
+    expect(R(create(text))).toEqual(create(text, 10, []));
+    expect(R(create(text, 3))).toEqual(create(text, 10, []));
 });
 
 describe('everythingUntil', () => {
-    const R = everythingUntil([' ', ','])(makeToken('e'));
+    const R = everythingUntil([' ', ',']);
     const text = 'good jo,b';
 
-    test('everythingUntil should work right', () => {
+    test('everythingUntil should advance past every character until a blacklisted one is reached', () => {
         expect(R(create(text))).toEqual(create(
             text,
             4,
-            [ makeToken('e')('good', 0) ]
+            []
         ));
 
         expect(R(create(text, 5))).toEqual(create(
             text,
             7,
-            [ makeToken('e')('jo', 5) ]
+            []
         ));
     });
     
@@ -141,7 +145,7 @@ describe('keywords', () => {
 });
 
 describe('ifThen', () => {
-    const R = ifThen(is('!'))(everythingUntil([' '])(makeToken('cmd')));
+    const R = ifThen(is('!'))(consume(everythingUntil([' ']))(makeToken('cmd')));
 
     test('ifThen should run reducer is predicate is true', () => {
         const expected = create('!add list', 4, [ makeToken('cmd')('!add', 0) ]);

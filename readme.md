@@ -19,7 +19,7 @@ const tokenizeCSV = tokenary([
         ',': single(makeToken(TokenType.comma)),
         '\n': single(makeToken(TokenType.newline))
     }),
-    everythingUntil(',', '\n')(makeToken(TokenType.value))
+    consume(everythingUntil(',', '\n'))(makeToken(TokenType.value))
 ]);
 
 const testCSV = 
